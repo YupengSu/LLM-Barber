@@ -5,7 +5,7 @@
 ```
 conda create -n bar python=3.9
 
-conda activate barber
+conda activate bar
 ```
 
 **Step 2: Install relevant packages**
