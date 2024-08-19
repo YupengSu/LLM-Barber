@@ -3,9 +3,9 @@
 **Step 1: Create a new conda environment:**
 
 ```
-conda create -n bar python=3.9
+conda create -n barber python=3.9
 
-conda activate bar
+conda activate barber
 ```
 
 **Step 2: Install relevant packages**
