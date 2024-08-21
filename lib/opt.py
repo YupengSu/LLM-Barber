@@ -9,7 +9,7 @@ from .data import get_loaders
 import matplotlib.pyplot as plt
 import os
 
-DEBUG = True
+DEBUG = False
 
 def find_layers(module, layers=[nn.Linear], name=''):
     """
