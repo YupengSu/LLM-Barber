@@ -1,0 +1,2149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LLM-Barber: Block-Aware Rebuilder for Sparsity Mask in One-Shot for Large Language Models</title>
+<meta name="description" content="LLM-Barber (ICCAD 2025): one-shot, block-aware rebuilding of sparsity masks for pruned large language models, with animated walkthroughs of the algorithm.">
+<meta name="theme-color" content="#003660">
+<link rel="canonical" href="https://yupengsu.github.io/LLM-Barber/">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><defs><clipPath id='c'><rect x='9' y='3' width='14' height='26' rx='7'/></clipPath></defs><rect x='9' y='3' width='14' height='26' rx='7' fill='%23fff'/><g clip-path='url(%23c)'><path d='M2 6 30 -8M2 14 30 0M2 22 30 8M2 30 30 16M2 38 30 24' stroke='%23e2661a' stroke-width='3.2'/><path d='M2 10 30 -4M2 18 30 4M2 26 30 12M2 34 30 20' stroke='%230a5bb5' stroke-width='3.2'/></g><rect x='9' y='3' width='14' height='26' rx='7' fill='none' stroke='%23003660' stroke-width='2'/></svg>" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:title" content="LLM-Barber: Block-Aware Rebuilder for Sparsity Mask in One-Shot for Large Language Models">
+<meta property="og:description" content="ICCAD 2025. One-shot, block-aware rebuilding of sparsity masks for pruned LLMs: block-level error, a weight-times-gradient score, and mask swaps that keep sparsity fixed.">
+<meta property="og:url" content="https://yupengsu.github.io/LLM-Barber/">
+<meta name="twitter:card" content="summary">
+<meta name="citation_author" content="Yupeng Su">
+<meta name="citation_author" content="Ziyi Guan">
+<meta name="citation_author" content="Xiaoqun Liu">
+<meta name="citation_author" content="Tianlai Jin">
+<meta name="citation_author" content="Dongkuan Wu">
+<meta name="citation_author" content="Zhengfei Chen">
+<meta name="citation_author" content="Graziano Chesi">
+<meta name="citation_author" content="Ngai Wong">
+<meta name="citation_author" content="Hao Yu">
+<meta name="citation_title" content="LLM-Barber: Block-Aware Rebuilder for Sparsity Mask in One-Shot for Large Language Models">
+<meta name="citation_conference_title" content="2025 IEEE/ACM International Conference On Computer Aided Design (ICCAD)">
+<meta name="citation_publication_date" content="2025">
+<meta name="citation_doi" content="10.1109/ICCAD66269.2025.11240704">
+<meta name="citation_arxiv_id" content="2408.10631">
+<meta name="citation_pdf_url" content="https://arxiv.org/pdf/2408.10631">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600;1,6..72,500&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,850&amp;text=LLM-Barber&amp;display=swap">
+<style>
+:root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+[hidden] { display: none !important; }
+/* ===========================================================
+   Project-page kit for yupengsu.github.io
+   Tokens, type and chrome come from the homepage (homepage.css):
+   UCSB navy + white, quiet gold, Inter + Newsreader.
+   Each project adds its own accent, title art and figures.
+   Layout: homepage frame (1080px), left-aligned reading column (~70ch); figures use the full frame.
+   =========================================================== */
+:root {
+  --navy: #003660; --navy-700: #012a4d; --blue: #0a5bb5; --blue-600: #0d68cf; --gold: #e0a021;
+  --ink: #14263a; --text: #3c4c5d; --muted: #6f7d8c; --line: #e6ebf1; --line-strong: #d0d9e4;
+  --bg: #ffffff; --bg-soft: #f4f7fb; --bg-card: #ffffff; --ring: rgba(10, 91, 181, .13); --on-navy: #ffffff;
+  --shadow-sm: 0 1px 2px rgba(1, 42, 77, .06);
+  --shadow: 0 4px 14px rgba(1, 42, 77, .08);
+  --shadow-lg: 0 16px 42px rgba(1, 42, 77, .16);
+  --radius: 16px; --maxw: 1080px;
+  --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --serif: "Newsreader", Georgia, "Times New Roman", serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-math: "Newsreader", "STIX Two Math", "Cambria Math", Georgia, serif;
+  --ease: cubic-bezier(.2, .7, .2, 1);
+  /* project slots: a project stylesheet overrides these */
+  --accent: #e0a021; --accent-soft: #fbf0d9; --on-accent: #1d1406;
+  --series-base: #0a5bb5; --series-ours: #e0a021;
+  --blue-soft: #d7e4f5; --green: #2b8757; --green-soft: #d3eadc; --hatch: rgba(20, 38, 58, .2);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --navy: #86b8ea; --navy-700: #6aa4de; --blue: #63a6f0; --blue-600: #7fb6f3; --gold: #ecb642;
+    --ink: #eaf1f8; --text: #bdc8d3; --muted: #8896a4; --line: #223244; --line-strong: #2e4258;
+    --bg: #0c1620; --bg-soft: #101e2a; --bg-card: #15222f; --ring: rgba(99, 166, 240, .18); --on-navy: #05121e;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, .3); --shadow: 0 4px 14px rgba(0, 0, 0, .34); --shadow-lg: 0 16px 44px rgba(0, 0, 0, .5);
+    --accent: #ecb642; --accent-soft: #3a2d10; --on-accent: #120d02;
+    --series-base: #4a8ad8; --series-ours: #ecb642;
+    --blue-soft: #1c3450; --green: #43a874; --green-soft: #17382a; --hatch: rgba(234, 241, 248, .18);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --navy: #86b8ea; --navy-700: #6aa4de; --blue: #63a6f0; --blue-600: #7fb6f3; --gold: #ecb642;
+  --ink: #eaf1f8; --text: #bdc8d3; --muted: #8896a4; --line: #223244; --line-strong: #2e4258;
+  --bg: #0c1620; --bg-soft: #101e2a; --bg-card: #15222f; --ring: rgba(99, 166, 240, .18); --on-navy: #05121e;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, .3); --shadow: 0 4px 14px rgba(0, 0, 0, .34); --shadow-lg: 0 16px 44px rgba(0, 0, 0, .5);
+  --accent: #ecb642; --accent-soft: #3a2d10; --on-accent: #120d02;
+  --series-base: #4a8ad8; --series-ours: #ecb642;
+  --blue-soft: #1c3450; --green: #43a874; --green-soft: #17382a; --hatch: rgba(234, 241, 248, .18);
+  color-scheme: dark;
+}
+
+/* ---------- base ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: calc(74px + env(safe-area-inset-top, 0px)); }
+body { margin: 0; font-family: var(--font); font-size: 16px; color: var(--text); background: var(--bg); line-height: 1.64; -webkit-font-smoothing: antialiased; transition: background .25s, color .25s; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 60; background: var(--bg); }
+a { color: var(--blue); text-decoration: none; }
+a:hover { color: var(--blue-600); }
+strong, b { color: var(--ink); font-weight: 600; }
+img { max-width: 100%; display: block; }
+h1, h2, h3, h4 { margin: 0; color: var(--ink); text-wrap: balance; }
+p, ul, ol, figure, dl, dd { margin: 0; }
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; border-radius: 6px; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.wrap { width: 100%; max-width: var(--maxw); margin-inline: auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+@media (min-width: 720px) { .wrap { padding-left: max(28px, env(safe-area-inset-left, 0px)); padding-right: max(28px, env(safe-area-inset-right, 0px)); } }
+.m { font-family: var(--font-math); font-style: italic; font-weight: 500; white-space: nowrap; }
+.m .u { font-style: normal; } /* upright bars, brackets and operators inside inline math */
+.num { font-variant-numeric: tabular-nums; }
+code { font-family: var(--mono); font-size: .86em; }
+:not(pre) > code { background: var(--bg-soft); border: 1px solid var(--line); padding: .04em .36em; border-radius: 5px; white-space: nowrap; color: var(--ink); }
+.bench :not(pre) > code, .tbl-wrap :not(pre) > code { background: var(--bg-card); }
+
+/* ---------- nav (homepage nav + breadcrumb) ---------- */
+.nav { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 50; background: var(--bg); background: color-mix(in srgb, var(--bg) 85%, transparent); -webkit-backdrop-filter: saturate(180%) blur(12px); backdrop-filter: saturate(180%) blur(12px); border-bottom: 1px solid transparent; transition: border-color .3s, box-shadow .3s; }
+.nav.is-stuck { border-color: var(--line); box-shadow: 0 4px 18px rgba(1, 42, 77, .05); }
+.nav__wrap { height: 58px; display: flex; align-items: center; gap: 12px; position: relative; }
+.nav__brand { margin-right: auto; display: inline-flex; align-items: baseline; gap: 9px; min-width: 0; font-family: var(--serif); font-weight: 600; font-size: 1.1rem; white-space: nowrap; }
+.nav__home { color: var(--muted); }
+.nav__home:hover { color: var(--blue); }
+.nav__sep { color: var(--line-strong); font-weight: 400; }
+.nav__here { color: var(--ink); overflow: hidden; text-overflow: ellipsis; }
+.nav__links { display: flex; align-items: center; gap: 4px; }
+.nav__links a { color: var(--muted); font-weight: 500; font-size: .92rem; padding: 7px 11px; border-radius: 8px; position: relative; transition: color .18s, background .18s; }
+.nav__links a:hover { color: var(--ink); background: var(--bg-soft); }
+.nav__links a.is-active { color: var(--navy); }
+.nav__links a.is-active::after { content: ""; position: absolute; left: 11px; right: 11px; bottom: 3px; height: 2px; background: var(--gold); border-radius: 2px; }
+.theme-toggle { display: grid; place-items: center; width: 34px; height: 34px; flex: none; border: 1px solid var(--line); border-radius: 9px; background: transparent; color: var(--muted); cursor: pointer; transition: color .2s, border-color .2s; }
+.theme-toggle:hover { color: var(--navy); border-color: var(--blue); }
+.theme-toggle .ic-moon { display: none; }
+:root[data-theme="dark"] .theme-toggle .ic-sun { display: none; }
+:root[data-theme="dark"] .theme-toggle .ic-moon { display: block; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .theme-toggle .ic-sun { display: none; } :root:not([data-theme="light"]) .theme-toggle .ic-moon { display: block; } }
+.nav__toggle { display: none; background: none; border: 0; cursor: pointer; flex-direction: column; gap: 5px; padding: 8px 4px; }
+.nav__toggle span { width: 22px; height: 2px; background: var(--ink); border-radius: 2px; }
+@media (max-width: 900px) {
+  .nav__toggle { display: flex; }
+  .nav__links { position: absolute; top: 58px; left: 0; right: 0; flex-direction: column; align-items: stretch; gap: 2px; padding: 12px max(16px, env(safe-area-inset-right, 0px)) 14px max(16px, env(safe-area-inset-left, 0px)); background: var(--bg); border-bottom: 1px solid var(--line); box-shadow: var(--shadow); transform: translateY(-8px); opacity: 0; pointer-events: none; transition: .22s; }
+  .nav__links.is-open { transform: none; opacity: 1; pointer-events: auto; }
+  .nav__links a { padding: 11px 12px; }
+  .nav__links a.is-active::after { display: none; }
+}
+@media (max-width: 420px) { .nav__home, .nav__sep { display: none; } }
+
+/* ---------- buttons, shields, segmented controls ---------- */
+.btn { display: inline-flex; align-items: center; gap: 8px; min-height: 38px; padding: 0 14px; border-radius: 9px; border: 1px solid var(--line); background: var(--bg-card); color: var(--ink); font: 600 .9rem/1 var(--font); cursor: pointer; white-space: nowrap; box-shadow: var(--shadow-sm); transition: transform .18s var(--ease), box-shadow .18s, border-color .18s, background .18s, color .18s; }
+.btn svg { width: 16px; height: 16px; flex: none; color: var(--blue); }
+.btn:hover { color: var(--ink); border-color: var(--blue); transform: translateY(-2px); box-shadow: var(--shadow); }
+.btn--primary { background: var(--navy); border-color: var(--navy); color: var(--on-navy); }
+.btn--primary svg { color: currentColor; }
+.btn--primary:hover { background: var(--blue); border-color: var(--blue); color: var(--on-navy); }
+.btn--sm { min-height: 32px; padding: 0 11px; font-size: .84rem; border-radius: 8px; box-shadow: none; }
+.btn--sm:hover { transform: none; box-shadow: none; }
+.btn--icon { width: 32px; padding: 0; justify-content: center; }
+.btn[disabled] { opacity: .45; cursor: not-allowed; transform: none; border-color: var(--line); }
+.shield { display: inline-flex; align-items: stretch; border-radius: 8px; overflow: hidden; border: 1px solid var(--line); font-size: .78rem; font-weight: 600; box-shadow: var(--shadow-sm); }
+.shield__k { background: var(--bg-soft); color: var(--muted); padding: 5px 10px; }
+.shield__v { background: var(--navy); color: var(--on-navy); padding: 5px 11px; font-variant-numeric: tabular-nums; }
+.ctl-row { display: flex; flex-wrap: wrap; gap: 14px 22px; align-items: flex-end; }
+.ctl { display: grid; gap: 6px; min-width: 0; }
+.ctl-label { font-size: .8rem; font-weight: 600; color: var(--muted); }
+.seg { display: inline-flex; flex-wrap: wrap; gap: 2px; padding: 3px; border-radius: 10px; background: var(--line); }
+.seg button { appearance: none; border: 0; background: transparent; color: var(--muted); font: 600 .84rem/1 var(--font); padding: 8px 12px; border-radius: 8px; cursor: pointer; white-space: nowrap; }
+.seg button:hover { color: var(--ink); }
+.seg button[aria-pressed="true"] { background: var(--bg-card); color: var(--ink); box-shadow: var(--shadow-sm); }
+.seg button[disabled] { opacity: .4; cursor: not-allowed; }
+.seg .m { font-size: .95rem; }
+input[type="range"] { width: 100%; accent-color: var(--accent); height: 28px; margin: 0; }
+
+/* ---------- hero ---------- */
+.hero { padding-block: clamp(28px, 4.5vw, 56px) clamp(24px, 3vw, 34px); }
+.nw { white-space: nowrap; }
+.hero__venue { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; font-size: .9rem; color: var(--muted); }
+.hero__subtitle { margin-top: 16px; max-width: 40ch; text-wrap: balance; font-family: var(--serif); font-weight: 600; font-size: clamp(1.35rem, 2.6vw, 1.85rem); line-height: 1.22; letter-spacing: -.01em; color: var(--ink); }
+.hero__tagline { margin-top: 10px; max-width: 62ch; font-size: 1.05rem; color: var(--text); }
+.hero__authors { margin-top: 22px; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 3px 16px; font-size: 1rem; font-weight: 500; color: var(--ink); }
+.hero__authors li { white-space: nowrap; }
+.hero__authors a { color: var(--ink); }
+.hero__authors a:hover { color: var(--blue); }
+.hero__authors sup { font-size: .68em; color: var(--muted); margin-left: 1px; font-weight: 600; }
+.hero__affil { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 2px 18px; font-size: .88rem; color: var(--muted); }
+.hero__affil sup { font-weight: 600; margin-right: 2px; }
+.hero__links { margin-top: 24px; display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* ---------- sections ---------- */
+.section { padding-block: clamp(38px, 5.5vw, 60px); border-top: 1px solid var(--line); }
+.section__head { display: grid; gap: 12px; margin-bottom: clamp(20px, 3vw, 30px); }
+.section__title { font-family: var(--serif); font-size: 1.55rem; font-weight: 600; letter-spacing: -.01em; line-height: 1.2; }
+.sub { margin-top: clamp(34px, 5vw, 56px); display: grid; gap: 16px; }
+.sub:first-child { margin-top: 0; }
+.sub__title { font-family: var(--serif); font-size: 1.25rem; font-weight: 600; letter-spacing: -.005em; line-height: 1.25; }
+.prose { max-width: 70ch; display: grid; gap: 13px; }
+.prose p { font-size: 1.01rem; text-wrap: pretty; }
+.lede { font-size: 1.08rem; color: var(--ink); }
+.note { font-size: .86rem; color: var(--muted); max-width: 80ch; }
+.callout { border-left: 3px solid var(--accent); background: var(--bg-soft); padding: 12px 16px; border-radius: 0 12px 12px 0; color: var(--text); }
+.dots { list-style: none; padding: 0; display: grid; gap: 10px; max-width: 70ch; }
+.dots li { position: relative; padding-left: 20px; }
+.dots li::before { content: ""; position: absolute; left: 3px; top: .62em; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+.kv { list-style: none; padding: 0; display: grid; gap: 9px; }
+.kv li { display: grid; grid-template-columns: minmax(0, 168px) minmax(0, 1fr); gap: 14px; align-items: baseline; padding: 11px 14px; background: var(--bg-card); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow-sm); transition: border-color .18s, transform .18s var(--ease); }
+.kv li:hover { border-color: var(--blue); transform: translateX(4px); }
+.kv .k { font-weight: 700; color: var(--navy); font-variant-numeric: tabular-nums; display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.kv .k svg { width: 16px; height: 11px; color: var(--accent); }
+.kv .v { color: var(--text); font-size: .94rem; }
+@media (max-width: 560px) { .kv li { grid-template-columns: minmax(0, 1fr); gap: 2px; } }
+
+/* ---------- figures ---------- */
+.bench { background: var(--bg-soft); border-radius: var(--radius); padding: clamp(14px, 2.4vw, 26px); }
+.card { background: var(--bg-card); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow-sm); }
+.fig-cap { margin-top: 12px; max-width: 80ch; font-size: .9rem; line-height: 1.58; color: var(--muted); }
+.fig-cap b { color: var(--ink); font-weight: 600; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; padding: 0; list-style: none; font-size: .82rem; color: var(--text); }
+.legend li { display: inline-flex; align-items: center; gap: 7px; }
+.sw { width: 12px; height: 12px; border-radius: 3px; flex: none; display: inline-block; }
+.sw.line { width: 18px; height: 3px; border-radius: 2px; }
+.sw.dot { border-radius: 50%; }
+.eq { padding: 14px 18px; background: var(--bg-soft); border-radius: 12px; overflow-x: auto; max-width: 70ch; display: grid; gap: 6px; }
+.eq math { font-family: var(--font-math); font-size: 1.3rem; }
+/* fences marked .f come from a math font when one is installed, so they stretch around fractions */
+.eq mo.f { font-family: "STIX Two Math", "Cambria Math", "Latin Modern Math", var(--font-math); }
+.eq .tag { font-size: .8rem; color: var(--muted); }
+.tip { position: fixed; z-index: 70; pointer-events: none; background: var(--ink); color: var(--bg); border-radius: 8px; padding: 8px 10px; font: 500 .8rem/1.4 var(--font); box-shadow: var(--shadow-lg); max-width: 260px; opacity: 0; transition: opacity .12s; }
+.tip.on { opacity: 1; }
+.tip b { color: inherit; font-weight: 700; font-variant-numeric: tabular-nums; }
+.tip .row { display: flex; align-items: center; gap: 8px; }
+.tip .key { width: 12px; height: 3px; border-radius: 2px; flex: none; }
+svg text.tick { font: 500 12px var(--font); fill: var(--muted); }
+svg text.lbl { font: 600 13px var(--font); fill: var(--ink); }
+svg text.val { font: 600 12.5px var(--font); fill: var(--ink); font-variant-numeric: tabular-nums; }
+svg text.val.mut { fill: var(--muted); font-weight: 500; }
+svg .grid line { stroke: var(--line); stroke-width: 1; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.res-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(14px, 2.4vw, 24px); }
+@media (max-width: 820px) { .res-grid { grid-template-columns: minmax(0, 1fr); } }
+.res-block { display: grid; gap: 12px; min-width: 0; align-content: start; }
+
+/* ---------- tables ---------- */
+.tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 12px; background: var(--bg-card); border: 1px solid var(--line); box-shadow: var(--shadow-sm); }
+table.t { border-collapse: collapse; width: 100%; font-size: .88rem; line-height: 1.35; font-variant-numeric: tabular-nums; color: var(--text); }
+table.t caption { text-align: left; caption-side: top; padding: 12px 14px 4px; font-weight: 600; font-size: .88rem; color: var(--ink); }
+table.t th, table.t td { padding: 8px 12px; text-align: right; white-space: nowrap; border-bottom: 1px solid var(--line); }
+table.t th:first-child, table.t td:first-child { text-align: left; }
+table.t.lead2 th:nth-child(2), table.t.lead2 td:nth-child(2) { text-align: left; }
+table.t thead th { font-weight: 600; font-size: .78rem; color: var(--muted); vertical-align: bottom; }
+table.t th { font-variant-numeric: normal; }
+table.t tbody th { font-weight: 600; color: var(--ink); }
+table.t tr.ours td, table.t tr.ours th { background: color-mix(in srgb, var(--accent) 9%, transparent); }
+table.t td.best { color: var(--ink); font-weight: 700; }
+table.t tr.grp td, table.t tr.grp th { border-top: 1px solid var(--line-strong); }
+table.t .mut { color: var(--muted); }
+table.t tr:last-child td, table.t tr:last-child th { border-bottom: 0; }
+details.more summary { cursor: pointer; font-weight: 600; color: var(--ink); padding: 10px 0; }
+details.more[open] summary { margin-bottom: 8px; }
+
+/* ---------- code & citation ---------- */
+pre.code { margin: 0; background: var(--bg-soft); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; overflow-x: auto; font: 400 .84rem/1.7 var(--mono); color: var(--ink); max-width: 100%; }
+pre.code .c { color: var(--muted); }
+pre.code .f { color: var(--accent); font-weight: 600; }
+.code-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+@media (max-width: 860px) { .code-grid { grid-template-columns: minmax(0, 1fr); } }
+.code-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 8px; font-size: .86rem; font-weight: 600; color: var(--ink); }
+.map td:first-child { white-space: normal; min-width: 170px; color: var(--ink); font-weight: 600; }
+.map td:last-child { white-space: normal; text-align: left; min-width: 260px; }
+.map th:last-child { text-align: left; }
+@media (max-width: 640px) {
+  table.map, table.map tbody, table.map tr, table.map td { display: block; width: 100%; }
+  table.map thead { display: none; }
+  table.map td { text-align: left; white-space: normal; min-width: 0 !important; }
+  table.map td:first-child { padding-bottom: 2px; border-bottom: 0; }
+  table.map td code { white-space: normal; overflow-wrap: anywhere; }
+}
+.cite { max-width: 900px; }
+
+/* ---------- footer & back-to-top (homepage) ---------- */
+.footer { border-top: 1px solid var(--line); margin-top: 8px; }
+.footer__inner { padding-block: 26px 40px; color: var(--muted); font-size: .85rem; text-align: center; }
+.totop { position: fixed; right: calc(22px + env(safe-area-inset-right, 0px)); bottom: calc(22px + env(safe-area-inset-bottom, 0px)); width: 42px; height: 42px; border-radius: 12px; background: var(--navy); color: var(--on-navy); border: 0; cursor: pointer; font-size: 1.05rem; box-shadow: var(--shadow-lg); opacity: 0; transform: translateY(12px); pointer-events: none; transition: opacity .25s, transform .25s var(--ease), background .2s; z-index: 40; }
+.totop.is-show { opacity: 1; transform: none; pointer-events: auto; }
+.totop:hover { background: var(--blue); }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .btn, .kv li, .totop { transition: none; }
+}
+
+/* ===========================================================
+   LLM-Barber module: barber-orange accent (from the paper's figures),
+   barber-pole title art, and the figures that animate the algorithm.
+   =========================================================== */
+:root { --accent: #e2661a; --accent-soft: #fbe0cc; --on-accent: #1d1006; --series-ours: #e2661a; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --accent: #e06d1c; --accent-soft: #48291a; --on-accent: #160b03; --series-ours: #e06d1c; }
+}
+:root[data-theme="dark"] { --accent: #e06d1c; --accent-soft: #48291a; --on-accent: #160b03; --series-ours: #e06d1c; }
+
+/* ---- title art: an expanded wordmark whose hyphen is a turning barber pole ---- */
+.title-art {
+  margin-top: 18px; color: var(--ink);
+  font-family: "Archivo", var(--font); font-stretch: 125%; font-weight: 850;
+  font-size: clamp(44px, 8.6vw, 92px); line-height: .92; letter-spacing: -.025em;
+}
+.dash {
+  display: inline-block; width: .44em; height: .145em; margin: 0 .04em 0 .05em; vertical-align: .29em; border-radius: .02em;
+  background-image: repeating-linear-gradient(-45deg, var(--accent) 0 .07em, var(--bg) .07em .1em, var(--blue) .1em .17em, var(--bg) .17em .2em);
+  background-size: .2828em 100%; animation: pole 2.4s linear infinite;
+}
+.pole-fill { background-image: repeating-linear-gradient(-45deg, var(--accent) 0 6px, var(--blue) 6px 12px); background-size: 16.97px 100%; animation: pole 1s linear infinite; }
+@keyframes pole { to { background-position: 16.97px 0; } }
+.dash { animation-name: pole-dash; }
+@keyframes pole-dash { to { background-position: .2828em 0; } }
+@media (prefers-reduced-motion: reduce) { .dash, .pole-fill, .demo-step.is-active .demo-step__bar i { animation: none !important; } }
+
+/* ---- legend swatches used across the figures ---- */
+.sw.kept { background: var(--blue); }
+.sw.pruned { background: var(--line); box-shadow: inset 0 0 0 1px var(--muted); }
+.sw.grown { background: var(--accent); }
+.sw.trimmed { background: var(--line); box-shadow: inset 0 0 0 2px var(--accent); }
+.sw.score { background: linear-gradient(90deg, var(--accent-soft), var(--accent)); }
+
+/* ---- first-screen demo ---- */
+.demo-sec { padding-bottom: clamp(34px, 5vw, 60px); }
+.demo-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; }
+.demo-steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; flex: 1 1 520px; min-width: 0; }
+.demo-step { width: 100%; appearance: none; border: 0; background: none; padding: 0; cursor: pointer; display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 6px 8px; text-align: left; color: var(--muted); font: 600 .9rem/1.2 var(--font); }
+.demo-step__n { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: var(--line); color: var(--text); font-size: .74rem; font-variant-numeric: tabular-nums; transition: background .25s, color .25s; }
+.demo-step__bar { grid-column: 1 / -1; height: 4px; border-radius: 2px; background: var(--line); overflow: hidden; position: relative; }
+.demo-step__bar i { position: absolute; inset: 0; transform-origin: 0 50%; transform: scaleX(0); background: var(--muted); }
+.demo-step:hover { color: var(--ink); }
+.demo-step.is-active { color: var(--ink); }
+.demo-step.is-active .demo-step__n { background: var(--navy); color: var(--on-navy); }
+.demo-step.is-done .demo-step__n { background: var(--accent); color: var(--on-accent); }
+.demo-step.is-active .demo-step__bar i { background-image: repeating-linear-gradient(-45deg, var(--accent) 0 6px, var(--blue) 6px 12px); background-size: 16.97px 100%; animation: pole 1s linear infinite; }
+.demo-ctl { display: flex; gap: 6px; }
+.demo-text { margin: 16px 0 8px; min-height: 3.2em; max-width: 72ch; font-size: 1.02rem; line-height: 1.6; color: var(--ink); }
+.demo-stage canvas { display: block; width: 100%; }
+.demo-foot { margin-top: 12px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 24px; }
+.readout { display: flex; flex-wrap: wrap; gap: 4px 20px; font-size: .86rem; color: var(--text); }
+.readout b { color: var(--ink); font-weight: 700; font-variant-numeric: tabular-nums; }
+.demo-tune { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); }
+.demo-alpha { flex: 1 1 260px; min-width: min(260px, 100%); max-width: 520px; }
+.demo-alpha .ctl-label { display: flex; justify-content: space-between; gap: 12px; }
+.demo-alpha output { font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
+.demo-more { margin-top: 10px; }
+.demo-more summary { font-size: .9rem; }
+.demo-more .ctl-row { margin-top: 4px; }
+.demo-charts { margin-top: 16px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 760px) { .demo-charts { grid-template-columns: minmax(0, 1fr); } }
+.chart-card { padding: 14px 14px 8px; min-width: 0; }
+.chart-card h4 { font-size: .9rem; font-weight: 600; color: var(--ink); }
+.chart-card .sub-l { font-size: .8rem; color: var(--muted); }
+.chart-card svg { display: block; width: 100%; height: auto; overflow: visible; }
+@media (max-width: 640px) { .demo-steps { flex-basis: 100%; } .demo-step { font-size: .8rem; } }
+
+/* ---- method: three steps, equations, forward / backward figure ---- */
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: clamp(38px, 5.5vw, 60px); }
+.step { display: grid; gap: 14px; min-width: 0; }
+.step__head { display: flex; align-items: center; gap: 12px; }
+.step__n { flex: none; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: var(--navy); color: var(--on-navy); font: 600 .82rem/1 var(--font); }
+.step > .fig-cap, .step > .note { margin-top: 0; }
+.eq.eq-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 22px; }
+.bf-top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 12px 20px; margin-bottom: 12px; }
+.bf-svg svg { display: block; width: 100%; height: auto; }
+.bf-foot { margin-top: 10px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 20px; }
+.bf-eq { font-size: .86rem; color: var(--text); }
+svg .t-ui { font-family: var(--font); }
+svg .t-math { font-family: var(--font-math); font-style: italic; font-weight: 500; }
+
+/* ---- results ---- */
+.more-body { display: grid; gap: 26px; padding-top: 6px; }
+.more-h { font-family: var(--serif); font-size: 1.1rem; font-weight: 600; }
+
+</style>
+<script>try{var t=localStorage.getItem('theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+</head>
+<body>
+<header class="nav" id="nav">
+  <div class="wrap nav__wrap">
+    <p class="nav__brand"><a class="nav__home" href="https://yupengsu.github.io/">Yupeng Su</a><span class="nav__sep" aria-hidden="true">/</span><a class="nav__here" href="#top">LLM-Barber</a></p>
+    <nav class="nav__links" id="navLinks" aria-label="Sections">
+      <a href="#how">Demo</a>
+      <a href="#method">Method</a>
+      <a href="#results">Results</a>
+      <a href="#code">Code</a>
+      <a href="#cite">Cite</a>
+    </nav>
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle dark mode" title="Toggle theme"><svg class="ic-sun" viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="currentColor"/><g stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><line x1="12" y1="2.5" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="21.5"/><line x1="2.5" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="21.5" y2="12"/><line x1="5.2" y1="5.2" x2="7" y2="7"/><line x1="17" y1="17" x2="18.8" y2="18.8"/><line x1="5.2" y1="18.8" x2="7" y2="17"/><line x1="17" y1="7" x2="18.8" y2="5.2"/></g></svg><svg class="ic-moon" viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path fill="currentColor" d="M20 14.5A8 8 0 0 1 9.5 4a1 1 0 0 0-1.3-1.2A9.5 9.5 0 1 0 21.2 15.8 1 1 0 0 0 20 14.5z"/></svg></button>
+    <button class="nav__toggle" id="navToggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="navLinks"><span></span><span></span><span></span></button>
+  </div>
+</header>
+<header class="hero wrap" id="top">
+  <p class="hero__venue"><span class="shield"><span class="shield__k">ICCAD</span><span class="shield__v">2025</span></span><span>IEEE/ACM International Conference on <span class="nw">Computer-Aided</span> Design, Munich</span></p>
+  <h1 class="title-art">LLM<span class="dash" aria-hidden="true"></span><span class="sr-only">-</span>Barber</h1>
+  <p class="hero__subtitle"><span class="nw">Block-Aware</span> Rebuilder for Sparsity Mask in <span class="nw">One-Shot</span> for Large Language Models</p>
+  <p class="hero__tagline">One pass rebuilds the mask of a pruned LLM. No retraining, no weight updates, same sparsity.</p>
+  <ul class="hero__authors" aria-label="Authors">
+    <li><a href="https://yupengsu.github.io/" target="_blank" rel="noopener">Yupeng Su</a><sup>1*</sup></li>
+    <li>Ziyi Guan<sup>2*</sup></li>
+    <li>Xiaoqun Liu<sup>1</sup></li>
+    <li>Tianlai Jin<sup>1</sup></li>
+    <li>Dongkuan Wu<sup>1</sup></li>
+    <li>Zhengfei Chen<sup>1</sup></li>
+    <li>Graziano Chesi<sup>2</sup></li>
+    <li>Ngai Wong<sup>2</sup></li>
+    <li>Hao Yu<sup>1†</sup></li>
+  </ul>
+  <p class="hero__affil">
+    <span><sup>1</sup>Southern University of Science and Technology</span>
+    <span><sup>2</sup>The University of Hong Kong</span>
+    <span><sup>*</sup>Equal contribution</span>
+    <span><sup>†</sup>Corresponding author</span>
+  </p>
+  <div class="hero__links">
+    <a class="btn btn--primary" href="https://doi.org/10.1109/ICCAD66269.2025.11240704" target="_blank" rel="noopener"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 1.75h5.5L13 5.25v9H4z"/><path d="M9.25 1.75v3.75H13M6.25 8.5h4.5M6.25 11h4.5"/></svg>Paper</a>
+    <a class="btn" href="https://arxiv.org/abs/2408.10631" target="_blank" rel="noopener"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 2.5h10M3 6h10M3 9.5h6M3 13h8"/></svg>arXiv</a>
+    <a class="btn" href="https://github.com/YupengSu/LLM-Barber" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>Code</a>
+    <a class="btn" href="#cite"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2.5 9.5c0-3 1.2-5 3.5-6M2.5 9.5h3v3.75h-3zM9.5 9.5c0-3 1.2-5 3.5-6M9.5 9.5h3v3.75h-3z"/></svg>BibTeX</a>
+  </div>
+</header>
+<main>
+<section class="demo-sec" id="how" aria-labelledby="how-h">
+  <div class="wrap">
+    <h2 class="sr-only" id="how-h">How LLM-Barber works</h2>
+    <figure class="bench demo" id="demo">
+      <div class="demo-head">
+        <ol class="demo-steps" id="demo-steps" aria-label="Steps of LLM-Barber"></ol>
+        <div class="demo-ctl">
+          <button class="btn btn--sm" type="button" id="demo-play" aria-pressed="false">Pause</button>
+          <button class="btn btn--sm" type="button" id="demo-replay">Replay</button>
+        </div>
+      </div>
+      <p class="demo-text" id="demo-text"></p>
+      <div class="demo-stage"><canvas id="demo-canvas" role="img" aria-label="The three weight matrices of a SwiGLU MLP block. A magnitude mask prunes half the weights; LLM-Barber backpropagates the block-output error, scores every weight by weight times gradient, and swaps the best pruned weights back in for the worst kept ones."></canvas></div>
+      <div class="demo-foot">
+        <div class="readout" id="demo-read"></div>
+        <ul class="legend" aria-label="Legend">
+          <li><span class="sw kept"></span>Kept</li>
+          <li><span class="sw pruned"></span>Pruned</li>
+          <li><span class="sw score"></span>Score</li>
+          <li><span class="sw grown"></span>Grown back</li>
+          <li><span class="sw trimmed"></span>Trimmed</li>
+        </ul>
+      </div>
+      <div class="demo-tune ctl-row">
+        <div class="ctl"><span class="ctl-label" id="dm-init-l">Starting mask</span>
+          <div class="seg" role="group" aria-labelledby="dm-init-l" data-key="init">
+            <button type="button" data-v="magnitude" aria-pressed="true">Magnitude</button>
+            <button type="button" data-v="wanda" aria-pressed="false">Wanda</button>
+          </div></div>
+        <div class="ctl demo-alpha">
+          <label class="ctl-label" for="demo-alpha"><span>Swap ratio <span class="m">α</span></span><output id="demo-alpha-o" for="demo-alpha">50%</output></label>
+          <input type="range" id="demo-alpha" min="0" max="100" step="1" value="50">
+        </div>
+      </div>
+      <details class="more demo-more" id="demo-more">
+        <summary>More options</summary>
+        <div class="ctl-row">
+          <div class="ctl"><span class="ctl-label" id="dm-sp-l">Sparsity</span>
+            <div class="seg" role="group" aria-labelledby="dm-sp-l" data-key="sparsity">
+              <button type="button" data-v="0.5" aria-pressed="true">50%</button>
+              <button type="button" data-v="0.6" aria-pressed="false">60%</button>
+              <button type="button" data-v="0.7" aria-pressed="false">70%</button>
+            </div></div>
+          <div class="ctl"><span class="ctl-label" id="dm-gr-l">Pairs formed per</span>
+            <div class="seg" role="group" aria-labelledby="dm-gr-l" data-key="gran">
+              <button type="button" data-v="output" aria-pressed="false">Row</button>
+              <button type="button" data-v="input" aria-pressed="false">Column</button>
+              <button type="button" data-v="layer" aria-pressed="false">Matrix</button>
+              <button type="button" data-v="block" aria-pressed="true">Block</button>
+            </div></div>
+          <div class="ctl"><span class="ctl-label" id="dm-me-l">Score</span>
+            <div class="seg" role="group" aria-labelledby="dm-me-l" data-key="metric">
+              <button type="button" data-v="WD" aria-pressed="true"><span class="m"><span class="u">|</span>W<span class="u">|·|</span>∂E/∂W<span class="u">|</span></span></button>
+              <button type="button" data-v="W" aria-pressed="false"><span class="m"><span class="u">|</span>W<span class="u">|</span></span></button>
+              <button type="button" data-v="D" aria-pressed="false"><span class="m"><span class="u">|</span>∂E/∂W<span class="u">|</span></span></button>
+            </div></div>
+          <button class="btn btn--sm" type="button" id="demo-seed">New random block</button>
+        </div>
+        <div class="demo-charts">
+          <div class="card chart-card" id="demo-err"><h4>Block error vs. <span class="m">α</span></h4><p class="sub-l">Too many swaps hurt again</p></div>
+          <div class="card chart-card" id="demo-gain"><h4>Gain of each candidate pair</h4><p class="sub-l">A few pairs carry most of the gain</p></div>
+        </div>
+      </details>
+    </figure>
+    <p class="fig-cap">A toy SwiGLU MLP block, computed live in your browser with the rules of the released code.</p>
+  </div>
+</section>
+
+<section class="section" id="method" aria-labelledby="method-h">
+  <div class="wrap">
+    <div class="section__head prose">
+      <h2 class="section__title" id="method-h">Method</h2>
+      <p>Every Self-Attention block (Q, K, V, O) and MLP block (gate, up, down) of the pruned model is rebuilt in three steps.</p>
+    </div>
+    <ol class="steps">
+      <li class="step">
+        <h3 class="sub__title step__head"><span class="step__n" aria-hidden="true">1</span>Measure the error at the block</h3>
+        <div class="prose"><p>Layer-wise pruners fit each projection to its own output, <span class="m"><span class="u">‖</span>WX <span class="u">− (</span>W <span class="u">⊙</span> M<span class="u">)</span>X<span class="u">‖²</span></span>, and the small biases accumulate from layer to layer. LLM-Barber takes one error at the output of the whole block, so the masks of all its projections are judged together:</p></div>
+        <div class="eq" role="group" aria-label="Block-aware reconstruction error">
+          <math display="block"><mrow><mi>E</mi><mo>=</mo><msubsup><mrow><mo class="f">‖</mo><mi>Block</mi><mo>(</mo><mi>W</mi><mo>,</mo><mi>X</mi><mo>)</mo><mo>−</mo><mi>Block</mi><mo>(</mo><mi>W</mi><mo>⊙</mo><mi>M</mi><mo>,</mo><mi>X</mi><mo>)</mo><mo class="f">‖</mo></mrow><mn>2</mn><mn>2</mn></msubsup></mrow></math>
+        </div>
+        <figure class="bench" id="bf">
+          <div class="bf-top">
+            <div class="ctl">
+              <span class="ctl-label" id="bf-mode-l">Error measured per</span>
+              <div class="seg" role="group" aria-labelledby="bf-mode-l">
+                <button type="button" id="bf-block" aria-pressed="true">Block (LLM-Barber)</button>
+                <button type="button" id="bf-layer" aria-pressed="false">Layer (prior pruners)</button>
+              </div>
+            </div>
+            <button class="btn btn--sm" type="button" id="bf-pause" aria-pressed="false">Pause</button>
+          </div>
+          <div class="bf-svg" id="bf-svg"></div>
+          <div class="bf-foot">
+            <ul class="legend" id="bf-legend" aria-label="Legend"></ul>
+            <p class="bf-eq" id="bf-eq"></p>
+          </div>
+        </figure>
+        <p class="fig-cap">The forward pass reaches each block's output, and the gradient of <span class="m">E</span> flows back to all of its projections, whose masks are then rebuilt. Each rebuilt block feeds the next, so the model needs one forward pass and one local backward pass per block.</p>
+      </li>
+      <li class="step">
+        <h3 class="sub__title step__head"><span class="step__n" aria-hidden="true">2</span>Score every weight with its gradient</h3>
+        <div class="prose"><p>At the dense model <span class="m">E</span> is zero and its gradient vanishes, which is why methods such as SparseGPT turn to the Hessian. After pruning <span class="m">E</span> is no longer zero, so the first-order term is enough. Pruning or regrowing a weight changes it by <span class="m"><span class="u">|Δ</span>W<sub>ij</sub><span class="u">| = |</span>W<sub>ij</sub><span class="u">|</span></span>, which gives the score:</p></div>
+        <div class="eq eq-row" role="group" aria-label="First-order change of the error and the resulting score">
+          <math display="block"><mrow><mi mathvariant="normal">Δ</mi><mi>E</mi><mo>≈</mo><mfrac><mrow><mo>∂</mo><mi>E</mi></mrow><mrow><mo>∂</mo><mi>W</mi></mrow></mfrac><mo>·</mo><mi mathvariant="normal">Δ</mi><mi>W</mi></mrow></math>
+          <math display="block"><mrow><mo>⇒</mo><mspace width="0.5em"></mspace><msub><mi>S</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><mrow><mo class="f">|</mo><msub><mi>W</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo class="f">|</mo></mrow><mo>·</mo><mrow><mo class="f">|</mo><mfrac><mrow><mo>∂</mo><mi>E</mi></mrow><mrow><mo>∂</mo><msub><mi>W</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mrow></mfrac><mo class="f">|</mo></mrow></mrow></math>
+        </div>
+      </li>
+      <li class="step">
+        <h3 class="sub__title step__head"><span class="step__n" aria-hidden="true">3</span>Swap weights in pairs</h3>
+        <div class="prose"><p>Within each group of weights (an output row, an input column, a matrix or a whole block), pruned weights are sorted by <span class="m">S</span> from high to low and kept weights from low to high, then paired in order. Each swap regrows one weight and prunes another, so sparsity never changes. Only a fraction <span class="m">α</span> of the pairs with a positive gain is swapped:</p></div>
+        <div class="eq" role="group" aria-label="Number of swapped pairs">
+          <math display="block"><mrow><mi>N</mi><mo>=</mo><mi>α</mi><mo>·</mo><mrow><mo class="f">|</mo><mo class="f">{</mo><mi>i</mi><mo>:</mo><msubsup><mi>S</mi><mi>i</mi><mtext>grow</mtext></msubsup><mo>−</mo><msubsup><mi>S</mi><mi>i</mi><mtext>prune</mtext></msubsup><mo>&gt;</mo><mn>0</mn><mo class="f">}</mo><mo class="f">|</mo></mrow></mrow></math>
+        </div>
+        <p class="note">The best <span class="m">α</span> sits where the outlier pairs end: about 10% after Magnitude and 1% after Wanda on LLaMA-7B.</p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section class="section" id="results" aria-labelledby="res-h">
+  <div class="wrap">
+    <div class="section__head"><h2 class="section__title" id="res-h">Results</h2></div>
+    <ul class="kv" aria-label="Key numbers">
+      <li><span class="k">205.5 <svg viewBox="0 0 16 11" aria-hidden="true"><path d="M1 5.5h12M9 1.5l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> 10.98</span><span class="v">WikiText-2 perplexity of LLaMA3-8B at 50% sparsity, from a magnitude mask</span></li>
+      <li><span class="k">7 of 7 models</span><span class="v">improve from every starting mask: Magnitude, SparseGPT and Wanda</span></li>
+      <li><span class="k">≈ 30 min</span><span class="v">per 7B–13B model on one A100, with no retraining and no weight updates</span></li>
+    </ul>
+
+    <figure class="bench chart" id="dumb" style="margin-top:22px">
+      <div class="ctl-row" style="margin-bottom:14px">
+        <div class="ctl"><span class="ctl-label" id="db-m-l">Starting mask</span>
+          <div class="seg" role="group" aria-labelledby="db-m-l" data-key="method">
+            <button type="button" data-v="magnitude" aria-pressed="true">Magnitude</button>
+            <button type="button" data-v="sparsegpt" aria-pressed="false">SparseGPT</button>
+            <button type="button" data-v="wanda" aria-pressed="false">Wanda</button>
+          </div></div>
+        <div class="ctl"><span class="ctl-label" id="db-p-l">Sparsity pattern</span>
+          <div class="seg" role="group" aria-labelledby="db-p-l" data-key="pattern">
+            <button type="button" data-v="u" aria-pressed="true">50% unstructured</button>
+            <button type="button" data-v="4:8" aria-pressed="false">4:8</button>
+            <button type="button" data-v="2:4" aria-pressed="false">2:4</button>
+          </div></div>
+      </div>
+      <div id="dumb-svg"></div>
+      <ul class="legend" id="dumb-legend" style="margin-top:10px" aria-label="Legend"></ul>
+    </figure>
+    <p class="note" id="dumb-take" style="margin-top:10px"></p>
+
+    <details class="more" style="margin-top:18px">
+      <summary>More results</summary>
+      <div class="more-body">
+        <div class="res-block">
+          <h3 class="more-h">Higher sparsity, LLaMA3-8B</h3>
+          <div class="bench chart"><div class="res-grid" id="hs-grid"></div>
+            <ul class="legend" style="margin-top:10px" aria-label="Legend">
+              <li><span class="sw line" style="background:var(--series-base)"></span>Starting mask</li>
+              <li><span class="sw line" style="background:var(--series-ours)"></span>With LLM-Barber</li>
+            </ul></div>
+        </div>
+        <div class="res-block">
+          <h3 class="more-h">Zero-shot accuracy at 50% sparsity</h3>
+          <div class="tbl-wrap" id="zs"></div>
+          <p class="note">Bold marks the best pruned result per task.</p>
+        </div>
+        <div class="res-block">
+          <h3 class="more-h">One pass vs. iterative regrowth (DSnoT), LLaMA3-8B</h3>
+          <div class="tbl-wrap" id="dsnot"></div>
+        </div>
+        <div class="res-grid">
+          <div class="res-block"><h3 class="more-h">Grouping of pairs, WikiText-2 perplexity</h3><div class="tbl-wrap" id="ab-gran"></div></div>
+          <div class="res-block"><h3 class="more-h">Score used for swaps, WikiText-2 perplexity</h3><div class="tbl-wrap" id="ab-metric"></div></div>
+        </div>
+        <div class="res-grid">
+          <div class="res-block"><h3 class="more-h">With APTQ on FPGA (EdgeLLM, Qwen2-7B)</h3><div class="tbl-wrap" id="dep-fpga"></div></div>
+          <div class="res-block"><h3 class="more-h">With APTQ on GPU, tokens/s</h3><div class="tbl-wrap" id="dep-gpu"></div></div>
+        </div>
+      </div>
+    </details>
+  </div>
+</section>
+
+<section class="section" id="code" aria-labelledby="code-h">
+  <div class="wrap">
+    <div class="section__head"><h2 class="section__title" id="code-h">Code</h2></div>
+    <div class="code-grid">
+      <div>
+        <div class="code-head">Set up</div>
+<pre class="code"><code>conda create -n barber python=3.10
+conda activate barber
+pip3 install torch torchvision torchaudio
+pip3 install -r requirements.txt</code></pre>
+      </div>
+      <div>
+        <div class="code-head">Rebuild a Wanda mask on LLaMA-7B</div>
+<pre class="code"><code>python main.py --model huggyllama/llama-7b \
+  --prune_method wanda \
+  --sparsity_ratio 0.5 --sparsity_type unstructured \
+  <span class="f">--prune_barber --prune_granularity output1 --threshold 0.01</span> \
+  --save_ppl out/ppl</code></pre>
+      </div>
+    </div>
+    <p class="note" style="margin-top:12px"><code>--threshold</code> is the swap ratio <span class="m">α</span> (the paper's mask rebuilding ratio). Commands for every experiment are in <a href="https://github.com/YupengSu/LLM-Barber" target="_blank" rel="noopener"><code>script/</code></a>.</p>
+  </div>
+</section>
+<section class="section" id="cite" aria-labelledby="cite-h">
+  <div class="wrap">
+    <div class="section__head"><h2 class="section__title" id="cite-h">Citation</h2></div>
+    <div class="cite">
+      <div class="code-head"><span>BibTeX</span><button class="btn btn--sm" type="button" id="copy-bib">Copy</button></div>
+<pre class="code" id="bibtex"><code>@inproceedings{su2025llmbarber,
+  title     = {{LLM-Barber}: Block-Aware Rebuilder for Sparsity Mask
+               in One-Shot for Large Language Models},
+  author    = {Su, Yupeng and Guan, Ziyi and Liu, Xiaoqun and Jin, Tianlai and
+               Wu, Dongkuan and Chen, Zhengfei and Chesi, Graziano and
+               Wong, Ngai and Yu, Hao},
+  booktitle = {2025 IEEE/ACM International Conference On Computer Aided Design (ICCAD)},
+  pages     = {1--9},
+  year      = {2025},
+  doi       = {10.1109/ICCAD66269.2025.11240704}
+}</code></pre>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="footer">
+  <div class="wrap footer__inner">LLM-Barber · ICCAD 2025 · Southern University of Science and Technology and The University of Hong Kong · <a href="https://yupengsu.github.io/">yupengsu.github.io</a></div>
+</footer>
+<button class="totop" id="toTop" type="button" aria-label="Back to top">↑</button>
+<div class="tip" id="tip" role="tooltip"></div>
+<script>
+/* Project-page kit: helpers shared by every figure, plus the homepage chrome
+   (theme toggle with the homepage's "theme" key, sticky nav, mobile menu, scroll-spy, back-to-top). */
+const U = (() => {
+  const $ = (s, el = document) => el.querySelector(s);
+  const $$ = (s, el = document) => Array.from(el.querySelectorAll(s));
+  const mqReduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const mqDark = window.matchMedia('(prefers-color-scheme: dark)');
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+  const easeOut = (t) => 1 - Math.pow(1 - t, 3);
+  const prog = (t, a, b) => clamp((t - a) / (b - a), 0, 1);
+  const NS = 'http://www.w3.org/2000/svg';
+
+  function svg(tag, attrs, parent) {
+    const el = document.createElementNS(NS, tag);
+    if (attrs) for (const k in attrs) el.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(el);
+    return el;
+  }
+  function el(tag, cls, parent, text) {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+
+  // ---- theme tokens, read from CSS so canvas drawings follow light/dark ----
+  const KEYS = ['bg', 'bg-soft', 'bg-card', 'ink', 'text', 'muted', 'line', 'line-strong', 'navy', 'blue', 'gold',
+    'accent', 'accent-soft', 'on-accent', 'blue-soft', 'green', 'green-soft', 'series-base', 'series-ours'];
+  const theme = { c: {}, rgb: {}, dark: false };
+  const subs = [];
+  function parse(str) {
+    str = str.trim();
+    if (str[0] === '#') {
+      let h = str.slice(1);
+      if (h.length === 3) h = h.split('').map((x) => x + x).join('');
+      return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
+    }
+    const m = str.match(/rgba?\(([^)]+)\)/);
+    if (m) return m[1].split(',').slice(0, 3).map((x) => parseFloat(x));
+    return [128, 128, 128];
+  }
+  function readTheme() {
+    const cs = getComputedStyle(document.documentElement);
+    for (const k of KEYS) { theme.c[k] = cs.getPropertyValue('--' + k).trim(); theme.rgb[k] = parse(theme.c[k]); }
+    const bg = theme.rgb.bg; theme.dark = (bg[0] + bg[1] + bg[2]) / 3 < 100;
+    theme.font = cs.getPropertyValue('--font').trim() || 'sans-serif';
+    theme.math = cs.getPropertyValue('--font-math').trim() || 'serif';
+    subs.forEach((f) => f());
+  }
+  function onTheme(f) { subs.push(f); }
+  const mixArr = (a, b, t) => [lerp(a[0], b[0], t), lerp(a[1], b[1], t), lerp(a[2], b[2], t)];
+  const rgbStr = (a, alpha) => (alpha == null || alpha >= 1 ? `rgb(${a[0] | 0},${a[1] | 0},${a[2] | 0})` : `rgba(${a[0] | 0},${a[1] | 0},${a[2] | 0},${alpha})`);
+  function lum(c) {
+    const f = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+    return 0.2126 * f(c[0]) + 0.7152 * f(c[1]) + 0.0722 * f(c[2]);
+  }
+  function onFill(fill, light, dark) {
+    const L = lum(fill);
+    return (lum(light) + 0.05) / (L + 0.05) >= (L + 0.05) / (lum(dark) + 0.05) ? light : dark;
+  }
+  function init() {
+    readTheme();
+    mqDark.addEventListener('change', readTheme);
+    new MutationObserver(readTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'class', 'style'] });
+  }
+  function visible(target, cb, threshold) {
+    if (!('IntersectionObserver' in window)) { cb(true); return; }
+    const io = new IntersectionObserver((es) => es.forEach((e) => cb(e.isIntersecting)), { threshold: threshold == null ? 0.02 : threshold });
+    io.observe(target);
+  }
+  function fitCanvas(cv, w, h) {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+    cv.style.width = w + 'px'; cv.style.height = h + 'px';
+    cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+    const ctx = cv.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return ctx;
+  }
+  function rr(ctx, x, y, w, h, r) {
+    r = Math.min(r, w / 2, h / 2);
+    ctx.beginPath();
+    ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+  }
+  // ---- tooltip ----
+  let tipEl = null;
+  function tip(nodes, x, y) {
+    tipEl = tipEl || document.getElementById('tip');
+    if (!tipEl) return;
+    tipEl.replaceChildren(...nodes);
+    tipEl.classList.add('on');
+    const pad = 14, r = tipEl.getBoundingClientRect();
+    let left = x + pad, top = y + pad;
+    if (left + r.width > window.innerWidth - 8) left = x - r.width - pad;
+    if (top + r.height > window.innerHeight - 8) top = y - r.height - pad;
+    tipEl.style.left = Math.max(8, left) + 'px'; tipEl.style.top = Math.max(8, top) + 'px';
+  }
+  function tipOff() { tipEl = tipEl || document.getElementById('tip'); if (tipEl) tipEl.classList.remove('on'); }
+  function tipRow(color, valueText, labelText) {
+    const row = el('div', 'row');
+    if (color) { const k = el('span', 'key', row); k.style.background = color; }
+    el('b', null, row, valueText);
+    row.appendChild(document.createTextNode(' ' + labelText));
+    return row;
+  }
+  // segmented control: buttons with data-v inside .seg[data-key]
+  function seg(group, onChange) {
+    const btns = $$('button', group);
+    btns.forEach((b) => b.addEventListener('click', () => {
+      if (b.disabled) return;
+      btns.forEach((x) => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+      onChange(b.dataset.v, b);
+    }));
+    return {
+      set(v) { btns.forEach((x) => x.setAttribute('aria-pressed', x.dataset.v === v ? 'true' : 'false')); },
+      disable(v, d) { btns.forEach((x) => { if (x.dataset.v === v) x.disabled = d; }); }
+    };
+  }
+  return { refresh: readTheme, $, $$, mqReduce, clamp, lerp, ease, easeOut, prog, svg, el, theme, onTheme, init, mixArr, rgbStr, lum, onFill, visible, fitCanvas, rr, tip, tipOff, tipRow, seg };
+})();
+
+const Kit = (() => {
+  function chrome() {
+    const root = document.documentElement;
+    // theme toggle: same storage key as the homepage, so the choice carries across yupengsu.github.io
+    const btn = document.getElementById('themeToggle');
+    if (btn) btn.addEventListener('click', () => {
+      let cur = root.getAttribute('data-theme');
+      if (!cur) cur = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      const next = cur === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      try { localStorage.setItem('theme', next); } catch (e) { /* storage unavailable */ }
+    });
+    // mobile menu
+    const navToggle = document.getElementById('navToggle'), navLinks = document.getElementById('navLinks');
+    if (navToggle && navLinks) {
+      navToggle.addEventListener('click', () => { const open = navLinks.classList.toggle('is-open'); navToggle.setAttribute('aria-expanded', open ? 'true' : 'false'); });
+      U.$$('a', navLinks).forEach((a) => a.addEventListener('click', () => { navLinks.classList.remove('is-open'); navToggle.setAttribute('aria-expanded', 'false'); }));
+    }
+    // sticky nav border + back-to-top
+    const nav = document.getElementById('nav'), toTop = document.getElementById('toTop');
+    const onScroll = () => {
+      const y = window.scrollY || window.pageYOffset;
+      if (nav) nav.classList.toggle('is-stuck', y > 8);
+      if (toTop) toTop.classList.toggle('is-show', y > 600);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true }); onScroll();
+    if (toTop) toTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: U.mqReduce.matches ? 'auto' : 'smooth' }));
+    // scroll-spy
+    const links = U.$$('#navLinks a[href^="#"]');
+    const byId = new Map(links.map((a) => [a.getAttribute('href').slice(1), a]));
+    if ('IntersectionObserver' in window) {
+      const spy = new IntersectionObserver((es) => es.forEach((e) => {
+        const a = byId.get(e.target.id);
+        if (a && e.isIntersecting) { links.forEach((x) => x.classList.remove('is-active')); a.classList.add('is-active'); }
+      }), { rootMargin: '-42% 0px -52% 0px', threshold: 0 });
+      byId.forEach((_, id) => { const s = document.getElementById(id); if (s) spy.observe(s); });
+    }
+    // copy BibTeX
+    const copy = document.getElementById('copy-bib'), pre = document.getElementById('bibtex');
+    if (copy && pre) copy.addEventListener('click', () => {
+      const done = (ok) => { copy.textContent = ok ? 'Copied' : 'Selected'; setTimeout(() => { copy.textContent = 'Copy'; }, 1800); };
+      const fallback = () => { const r = document.createRange(); r.selectNodeContents(pre); const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r); done(false); };
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(pre.textContent).then(() => done(true), fallback);
+        else fallback();
+      } catch (e) { fallback(); }
+    });
+  }
+  function boot(inits) {
+    const run = () => {
+      U.init();
+      chrome();
+      inits.forEach(([name, f]) => { try { f(); } catch (e) { console.error('[' + name + ']', e); } });
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => U.refresh());
+    };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run); else run();
+  }
+  return { boot };
+})();
+
+/* LLM-Barber toy engine: a LLaMA-style SwiGLU MLP block, pruned and rebuilt
+   exactly the way lib/llama.py + lib/blockgpt.py do it, at toy scale. */
+const Toy = (() => {
+  const D = 16, H = 32, S = 8, T = 32, NE = 512;
+  const OUTLIERS = [3, 11];
+
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function makeRng(seed) {
+    const u = mulberry32(seed * 2654435761 >>> 0);
+    let spare = null;
+    return {
+      u,
+      normal() {
+        if (spare !== null) { const s = spare; spare = null; return s; }
+        let a, b, s;
+        do { a = u() * 2 - 1; b = u() * 2 - 1; s = a * a + b * b; } while (s >= 1 || s === 0);
+        const m = Math.sqrt(-2 * Math.log(s) / s);
+        spare = b * m; return a * m;
+      }
+    };
+  }
+  function studentT(rng, nu) {
+    const z = rng.normal(); let chi = 0;
+    for (let i = 0; i < nu; i++) { const g = rng.normal(); chi += g * g; }
+    return z / Math.sqrt(chi / nu);
+  }
+
+  function makeBlock(seed) {
+    const rng = makeRng(seed);
+    const W = (o, i) => {
+      const a = new Float64Array(o * i);
+      for (let k = 0; k < a.length; k++) a[k] = studentT(rng, 4) / Math.sqrt(i) * 0.8;
+      return a;
+    };
+    const mats = [
+      { key: 'gate', rows: H, cols: D, W: W(H, D) },
+      { key: 'up', rows: H, cols: D, W: W(H, D) },
+      { key: 'down', rows: D, cols: H, W: W(D, H) }
+    ];
+    const X = (n) => {
+      const a = new Float64Array(n * D);
+      for (let t = 0; t < n; t++) for (let j = 0; j < D; j++) {
+        let v = rng.normal();
+        if (OUTLIERS.indexOf(j) >= 0) v *= 10;
+        a[t * D + j] = v;
+      }
+      return a;
+    };
+    return { mats, Xc: X(S * T), Xe: X(NE) };
+  }
+
+  const silu = (z) => z / (1 + Math.exp(-z));
+  const dsilu = (z) => { const s = 1 / (1 + Math.exp(-z)); return s * (1 + z * (1 - s)); };
+
+  // y = Wd (silu(Wg x) * (Wu x)); returns {y, g, u, a}
+  function forward(Wg, Wu, Wd, X, n) {
+    const g = new Float64Array(n * H), u = new Float64Array(n * H), a = new Float64Array(n * H), y = new Float64Array(n * D);
+    for (let t = 0; t < n; t++) {
+      const xo = t * D, ho = t * H;
+      for (let r = 0; r < H; r++) {
+        let sg = 0, su = 0; const wo = r * D;
+        for (let j = 0; j < D; j++) { const x = X[xo + j]; sg += Wg[wo + j] * x; su += Wu[wo + j] * x; }
+        g[ho + r] = sg; u[ho + r] = su; a[ho + r] = silu(sg) * su;
+      }
+      for (let r = 0; r < D; r++) {
+        let s = 0; const wo = r * H;
+        for (let k = 0; k < H; k++) s += Wd[wo + k] * a[ho + k];
+        y[t * D + r] = s;
+      }
+    }
+    return { y, g, u, a };
+  }
+
+  function masked(mat, M) {
+    const out = new Float64Array(mat.W.length);
+    for (let k = 0; k < out.length; k++) out[k] = M[k] ? mat.W[k] : 0;
+    return out;
+  }
+
+  // ---- initial masks (1 = kept) ----
+  function initMasks(block, method, sparsity) {
+    const { mats, Xc } = block;
+    const n = S * T;
+    if (method === 'magnitude') {
+      // lib/llama.py prune_magnitude: one threshold per matrix
+      return mats.map((m) => {
+        const idx = Array.from(m.W.keys()).sort((p, q) => Math.abs(m.W[p]) - Math.abs(m.W[q]) || p - q);
+        const M = new Uint8Array(m.W.length).fill(1);
+        const k = Math.floor(m.W.length * sparsity);
+        for (let i = 0; i < k; i++) M[idx[i]] = 0;
+        return M;
+      });
+    }
+    // wanda: |W_ij| * ||x_j||, compared within each output row
+    const f = forward(mats[0].W, mats[1].W, mats[2].W, Xc, n);
+    const nx = new Float64Array(D), na = new Float64Array(H);
+    for (let t = 0; t < n; t++) {
+      for (let j = 0; j < D; j++) nx[j] += Xc[t * D + j] ** 2;
+      for (let k = 0; k < H; k++) na[k] += f.a[t * H + k] ** 2;
+    }
+    for (let j = 0; j < D; j++) nx[j] = Math.sqrt(nx[j]);
+    for (let k = 0; k < H; k++) na[k] = Math.sqrt(na[k]);
+    return mats.map((m, mi) => {
+      const norm = mi < 2 ? nx : na;
+      const M = new Uint8Array(m.W.length).fill(1);
+      const k = Math.floor(m.cols * sparsity);
+      for (let r = 0; r < m.rows; r++) {
+        const idx = Array.from({ length: m.cols }, (_, c) => c)
+          .sort((p, q) => Math.abs(m.W[r * m.cols + p]) * norm[p] - Math.abs(m.W[r * m.cols + q]) * norm[q] || p - q);
+        for (let i = 0; i < k; i++) M[r * m.cols + idx[i]] = 0;
+      }
+      return M;
+    });
+  }
+
+  // ---- block-aware scores: |W| * sqrt(mean_s (dE_s/dW)^2), as in mask_rebuild ----
+  function scores(block, masks, metric) {
+    const { mats, Xc } = block;
+    const Ws = mats.map((m) => m.W);
+    const Wm = mats.map((m, i) => masked(m, masks[i]));
+    const sq = mats.map((m) => new Float64Array(m.W.length));
+    const Xs = new Float64Array(T * D);
+    for (let s = 0; s < S; s++) {
+      Xs.set(Xc.subarray(s * T * D, (s + 1) * T * D));
+      const tgt = forward(Wm[0], Wm[1], Wm[2], Xs, T).y;     // sparse block output (fixed)
+      const f = forward(Ws[0], Ws[1], Ws[2], Xs, T);          // dense block, differentiated
+      const dy = new Float64Array(T * D);
+      const sc = 2 / (T * D);
+      for (let k = 0; k < dy.length; k++) dy[k] = sc * (f.y[k] - tgt[k]);
+      const gWg = new Float64Array(H * D), gWu = new Float64Array(H * D), gWd = new Float64Array(D * H);
+      for (let t = 0; t < T; t++) {
+        const ho = t * H, yo = t * D, xo = t * D;
+        for (let r = 0; r < D; r++) { const d = dy[yo + r]; if (d === 0) continue; for (let k = 0; k < H; k++) gWd[r * H + k] += d * f.a[ho + k]; }
+        for (let k = 0; k < H; k++) {
+          let da = 0; for (let r = 0; r < D; r++) da += dy[yo + r] * Ws[2][r * H + k];
+          const gg = f.g[ho + k];
+          const du = da * silu(gg), dg = da * f.u[ho + k] * dsilu(gg);
+          for (let j = 0; j < D; j++) { const x = Xs[xo + j]; gWu[k * D + j] += du * x; gWg[k * D + j] += dg * x; }
+        }
+      }
+      const gs = [gWg, gWu, gWd];
+      for (let i = 0; i < 3; i++) for (let k = 0; k < gs[i].length; k++) sq[i][k] += gs[i][k] * gs[i][k] / S;
+    }
+    return mats.map((m, i) => {
+      const out = new Float64Array(m.W.length);
+      for (let k = 0; k < out.length; k++) {
+        const w = Math.abs(m.W[k]), g = Math.sqrt(sq[i][k]);
+        out[k] = metric === 'W' ? w : metric === 'D' ? g : w * g;
+      }
+      return { score: out, grad: sq[i].map(Math.sqrt) };
+    });
+  }
+
+  function groupsFor(block, gran) {
+    const { mats } = block; const groups = [];
+    if (gran === 'block') groups.push(mats.map((m, i) => [i, Array.from(m.W.keys())]));
+    else if (gran === 'layer') mats.forEach((m, i) => groups.push([[i, Array.from(m.W.keys())]]));
+    else if (gran === 'output') mats.forEach((m, i) => { for (let r = 0; r < m.rows; r++) groups.push([[i, Array.from({ length: m.cols }, (_, c) => r * m.cols + c)]]); });
+    else mats.forEach((m, i) => { for (let c = 0; c < m.cols; c++) groups.push([[i, Array.from({ length: m.rows }, (_, r) => r * m.cols + c)]]); });
+    return groups;
+  }
+
+  // Pair up candidates per group (lib/llama.py find_threshold): grow = pruned by score desc,
+  // prune = kept by score asc; npos = #pairs with positive gain; swap the first floor(npos * alpha).
+  function pairs(block, masks, sc, gran) {
+    return groupsFor(block, gran).map((grp) => {
+      const grow = [], prune = [];
+      for (const [i, idx] of grp) for (const k of idx) (masks[i][k] ? prune : grow).push([i, k, sc[i].score[k]]);
+      grow.sort((p, q) => q[2] - p[2]); prune.sort((p, q) => p[2] - q[2]);
+      const L = Math.min(grow.length, prune.length); let npos = 0;
+      while (npos < L && grow[npos][2] - prune[npos][2] > 0) npos++;
+      return { grow, prune, npos };
+    });
+  }
+
+  function rebuild(masks, pr, alpha) {
+    const out = masks.map((M) => M.slice());
+    let swaps = 0, npos = 0;
+    for (const g of pr) {
+      const N = Math.floor(g.npos * alpha + 1e-9);
+      npos += g.npos; swaps += N;
+      for (let j = 0; j < N; j++) { out[g.grow[j][0]][g.grow[j][1]] = 1; out[g.prune[j][0]][g.prune[j][1]] = 0; }
+    }
+    return { masks: out, swaps, npos };
+  }
+
+  function error(block, masks) {
+    const { mats, Xe } = block;
+    const d = forward(mats[0].W, mats[1].W, mats[2].W, Xe, NE).y;
+    const s = forward(masked(mats[0], masks[0]), masked(mats[1], masks[1]), masked(mats[2], masks[2]), Xe, NE).y;
+    let num = 0, den = 0;
+    for (let k = 0; k < d.length; k++) { num += (d[k] - s[k]) ** 2; den += d[k] ** 2; }
+    return num / den;
+  }
+
+  function gains(pr, alpha) {
+    const out = [];
+    for (const g of pr) {
+      const N = Math.floor(g.npos * alpha + 1e-9);
+      for (let j = 0; j < g.npos; j++) out.push([g.grow[j][2] - g.prune[j][2], j < N]);
+    }
+    out.sort((p, q) => q[0] - p[0]);
+    return out;
+  }
+
+  function sparsity(masks) { let z = 0, n = 0; for (const M of masks) for (const v of M) { n++; if (!v) z++; } return z / n; }
+
+  return { D, H, S, T, NE, makeBlock, initMasks, scores, pairs, rebuild, error, gains, sparsity, forward };
+})();
+if (typeof module !== 'undefined') module.exports = Toy;
+
+/* Draws the toy SwiGLU block (W_gate, W_up, W_down) as grids of weight tiles, plus the block-output error node. */
+const BlockView = (() => {
+  const { clamp } = U;
+  const MATS = [
+    { key: 'gate', sub: 'gate', rows: 32, cols: 16 },
+    { key: 'up', sub: 'up', rows: 32, cols: 16 },
+    { key: 'down', sub: 'down', rows: 16, cols: 32 }
+  ];
+  const LEAD = 2.6, GAP = 1.6, OP = 6.0, TAIL = 7.4;
+  const UNITS = LEAD + 16 + GAP + 16 + OP + 32 + TAIL;
+
+  function geometry(width, o) {
+    o = o || {};
+    const labelGap = 8, labelH = o.twoLines ? 36 : 18, top = 6;
+    if (width < 560) {
+      let c = Math.floor((width / 35.6) * 4) / 4;
+      c = clamp(c, o.minCell || 3, Math.min(o.maxCell || 10, 8));
+      const gap = c >= 9 ? 1.5 : c >= 6 ? 1 : c >= 4 ? 0.75 : 0.5;
+      const x0 = Math.max(0, (width - 33.6 * c) / 2);
+      const opY = top + 32 * c + labelGap + labelH + 10 + 1.2 * c;
+      const dy = opY + 1.2 * c + 14;
+      const mats = [
+        Object.assign({}, MATS[0], { x: x0, y: top }),
+        Object.assign({}, MATS[1], { x: x0 + 17.6 * c, y: top }),
+        Object.assign({}, MATS[2], { x: Math.max(0, (width - 32 * c) / 2), y: dy })
+      ];
+      const pr = clamp(1.6 * c, 11, 15);
+      const downBottom = dy + 16 * c + labelGap + labelH;
+      const probe = { x: width / 2, y: downBottom + 18 + pr, r: pr, from: [width / 2, downBottom + 2] };
+      const height = Math.ceil(probe.y + pr + 8);
+      return { stacked: true, c, gap, width, height, top, mats, opX: width / 2, opY, probe };
+    }
+    let c = Math.floor((width / UNITS) * 4) / 4;
+    c = clamp(c, o.minCell || 3, o.maxCell || 10);
+    const x0 = Math.max(0, (width - UNITS * c) / 2);
+    const gx = x0 + LEAD * c, ux = gx + (16 + GAP) * c, dx = ux + (16 + OP) * c;
+    const mats = [
+      Object.assign({}, MATS[0], { x: gx, y: top }),
+      Object.assign({}, MATS[1], { x: ux, y: top }),
+      Object.assign({}, MATS[2], { x: dx, y: top + 8 * c })
+    ];
+    const midY = top + 16 * c;
+    const pr = clamp(1.6 * c, 11, 15);
+    const probe = { x: dx + 32 * c + 2.4 * c + pr, y: midY, r: pr, from: [dx + 32 * c + 0.4 * c, midY] };
+    const height = Math.ceil(top + 32 * c + labelGap + labelH + 2);
+    const gap = c >= 9 ? 1.5 : c >= 6 ? 1 : c >= 4 ? 0.75 : 0.5;
+    return { c, gap, width, height, top, mats, midY, opX: ux + 16 * c + (OP * c) / 2, opY: midY, inX: x0 + 0.9 * c, probe };
+  }
+
+  // style(mi, k) -> {fill:[r,g,b], hollow:0..1, ring:0..1, scale}
+  function draw(ctx, geo, style, opts) {
+    opts = opts || {};
+    const th = U.theme.rgb;
+    const { c, gap } = geo;
+    ctx.clearRect(0, 0, geo.width, geo.height);
+    const ringW = c >= 8 ? 2 : c >= 5 ? 1.4 : 1;
+    const radius = c >= 8 ? 1.6 : c >= 6 ? 1 : 0;
+    for (let mi = 0; mi < geo.mats.length; mi++) {
+      const m = geo.mats[mi];
+      for (let r = 0; r < m.rows; r++) {
+        for (let col = 0; col < m.cols; col++) {
+          const k = r * m.cols + col;
+          const st = style(mi, k);
+          const sc = st.scale == null ? 1 : st.scale;
+          const s = (c - gap) * sc;
+          const x = m.x + col * c + (c - gap - s) / 2;
+          const y = m.y + r * c + (c - gap - s) / 2;
+          ctx.fillStyle = U.rgbStr(U.mixArr(st.fill, th.line, st.hollow || 0));
+          if (radius) { U.rr(ctx, x, y, s, s, radius); ctx.fill(); } else ctx.fillRect(x, y, s, s);
+          if (st.ring > 0.02) {
+            ctx.strokeStyle = U.rgbStr(th.accent, st.ring);
+            ctx.lineWidth = ringW;
+            const i = ringW / 2;
+            if (radius) { U.rr(ctx, x + i, y + i, s - 2 * i, s - 2 * i, radius); ctx.stroke(); } else ctx.strokeRect(x + i, y + i, s - 2 * i, s - 2 * i);
+          }
+        }
+      }
+    }
+    if (opts.overlay) opts.overlay(ctx);
+    chrome(ctx, geo, opts);
+  }
+
+  function arrow(ctx, x0, y0, x1, y1, c) {
+    const hs = clamp(c * 0.55, 3, 5);
+    const ang = Math.atan2(y1 - y0, x1 - x0);
+    ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1 - Math.cos(ang), y1 - Math.sin(ang)); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x1, y1);
+    ctx.lineTo(x1 - hs * Math.cos(ang) + hs * 0.75 * Math.sin(ang), y1 - hs * Math.sin(ang) - hs * 0.75 * Math.cos(ang));
+    ctx.lineTo(x1 - hs * Math.cos(ang) - hs * 0.75 * Math.sin(ang), y1 - hs * Math.sin(ang) + hs * 0.75 * Math.cos(ang));
+    ctx.closePath(); ctx.fill();
+  }
+
+  function chrome(ctx, geo, opts) {
+    const th = U.theme.rgb;
+    const { c } = geo;
+    const muted = U.rgbStr(th.muted);
+    ctx.save();
+    ctx.strokeStyle = muted; ctx.fillStyle = muted; ctx.lineWidth = 1.25; ctx.lineCap = 'round';
+    const ox = geo.opX, oy = geo.opY, r = clamp(c * 0.9, 4, 9);
+    if (geo.stacked) {
+      ctx.beginPath(); ctx.arc(ox, oy, r, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(ox, oy, Math.max(1.2, r * 0.22), 0, Math.PI * 2); ctx.fill();
+      const yEnd = geo.mats[2].y - 4;
+      if (yEnd - (oy + r) > 6) arrow(ctx, ox, oy + r + 1, ox, yEnd, c);
+    } else {
+      const y = geo.midY;
+      const ax1 = geo.mats[0].x - 0.5 * c;
+      if (ax1 - geo.inX > 6) arrow(ctx, geo.inX, y, ax1, y, c);
+      const upEnd = geo.mats[1].x + 16 * c + 0.4 * c;
+      if (ox - r - upEnd > 3) { ctx.beginPath(); ctx.moveTo(upEnd, y); ctx.lineTo(ox - r - 1, y); ctx.stroke(); }
+      ctx.beginPath(); ctx.arc(ox, y, r, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(ox, y, Math.max(1.2, r * 0.22), 0, Math.PI * 2); ctx.fill();
+      const dStart = geo.mats[2].x - 0.5 * c;
+      if (dStart - (ox + r) > 6) arrow(ctx, ox + r + 1, y, dStart, y, c);
+    }
+    // block-output error node
+    const p = geo.probe, pv = opts.probe || { fill: 0, text: '' };
+    arrow(ctx, p.from[0], p.from[1], geo.stacked ? p.x : p.x - p.r - 2, geo.stacked ? p.y - p.r - 2 : p.y, c);
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.r + (pv.pulse || 0) * 4, 0, Math.PI * 2);
+    ctx.fillStyle = U.rgbStr(U.mixArr(th['bg-soft'], th.accent, pv.fill));
+    ctx.fill();
+    ctx.lineWidth = 2; ctx.strokeStyle = U.rgbStr(pv.fill > 0 ? th.accent : th['line-strong']); ctx.stroke();
+    ctx.font = `italic 500 ${Math.round(p.r * 1.15)}px ${U.theme.math}`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = U.rgbStr(pv.fill > 0.55 ? th['on-accent'] : pv.fill > 0 ? th.accent : th.muted);
+    ctx.fillText('E', p.x, p.y + 1);
+    if (pv.text) {
+      const small = clamp(Math.round(c * 1.1), 10, 12), big = clamp(Math.round(c * 1.3), 12, 14);
+      ctx.textBaseline = 'alphabetic';
+      if (geo.stacked) {
+        ctx.textAlign = 'left';
+        ctx.font = `500 ${small}px ${U.theme.font}`; ctx.fillStyle = U.rgbStr(th.muted); ctx.fillText('block error', p.x + p.r + 10, p.y - 2);
+        ctx.font = `700 ${big}px ${U.theme.font}`; ctx.fillStyle = U.rgbStr(th.ink); ctx.fillText(pv.text, p.x + p.r + 10, p.y + big);
+      } else {
+        ctx.textAlign = 'center';
+        ctx.font = `500 ${small}px ${U.theme.font}`; ctx.fillStyle = U.rgbStr(th.muted); ctx.fillText('block error', p.x, p.y + p.r + 8 + small);
+        ctx.font = `700 ${big}px ${U.theme.font}`; ctx.fillStyle = U.rgbStr(th.ink); ctx.fillText(pv.text, p.x, p.y + p.r + 12 + small + big);
+      }
+    }
+    ctx.textAlign = 'start'; ctx.textBaseline = 'alphabetic';
+    // matrix labels
+    const fs = clamp(Math.round(c * 1.3), 11, 13);
+    for (let i = 0; i < geo.mats.length; i++) {
+      const m = geo.mats[i];
+      const cx = m.x + (m.cols * c) / 2, ly = m.y + m.rows * c + 8 + fs;
+      label(ctx, cx, ly, m.sub, `${m.rows}×${m.cols}`, fs);
+      if (opts.extra) {
+        ctx.font = `500 ${fs - 1}px ${U.theme.font}`; ctx.fillStyle = U.rgbStr(th.muted); ctx.textAlign = 'center';
+        ctx.fillText(opts.extra[i], cx, ly + fs + 5); ctx.textAlign = 'start';
+      }
+    }
+    ctx.restore();
+  }
+
+  function label(ctx, cx, y, sub, dims, fs) {
+    const th = U.theme.rgb;
+    const fW = `italic 500 ${fs + 2}px ${U.theme.math}`, fS = `600 ${fs - 2}px ${U.theme.font}`, fD = `500 ${fs - 1}px ${U.theme.font}`;
+    ctx.font = fW; const wW = ctx.measureText('W').width;
+    ctx.font = fS; const wS = ctx.measureText(sub).width;
+    ctx.font = fD; const wD = ctx.measureText(dims).width;
+    let x = cx - (wW + 1 + wS + 6 + wD) / 2;
+    ctx.fillStyle = U.rgbStr(th.ink);
+    ctx.font = fW; ctx.fillText('W', x, y); x += wW + 1;
+    ctx.font = fS; ctx.fillText(sub, x, y + 3); x += wS + 6;
+    ctx.fillStyle = U.rgbStr(th.muted); ctx.font = fD; ctx.fillText(dims, x, y);
+  }
+
+  function ranks(arr) {
+    const idx = Array.from(arr.keys()).sort((a, b) => arr[a] - arr[b]);
+    const out = new Float64Array(arr.length), n = arr.length - 1 || 1;
+    idx.forEach((k, i) => { out[k] = i / n; });
+    return out;
+  }
+  return { geometry, draw, ranks, MATS };
+})();
+
+/* The first-screen figure: the whole LLM-Barber loop on a toy SwiGLU block, told in four steps
+   (prune, score, swap, result) and computed live with the same rules as the released code. */
+const Demo = (() => {
+  const { clamp, prog, easeOut, mixArr, svg } = U;
+  const T = { mask: 0.8, probe: 3.0, score: 3.6, swap: 6.6, res: 9.6, err: 10.1, back: 13.2, loop: 13.8 };
+  const STEPS = [
+    { label: 'Prune', t0: 0, t1: 3.0 },
+    { label: 'Score', t0: 3.0, t1: 6.6 },
+    { label: 'Swap', t0: 6.6, t1: 9.6 },
+    { label: 'Result', t0: 9.6, t1: 13.2 }
+  ];
+  const SWEEP = 1.1, CELL = 0.55, GRID = Array.from({ length: 51 }, (_, i) => i / 50);
+  const NAMES = { magnitude: 'Magnitude', wanda: 'Wanda' };
+  const pct = (v) => (v * 100 >= 10 ? (v * 100).toFixed(1) : (v * 100).toFixed(2)) + '%';
+  const bump = (x) => Math.sin(Math.PI * clamp(x, 0, 1));
+
+  function init() {
+    const fig = document.getElementById('demo');
+    if (!fig) return;
+    const cv = document.getElementById('demo-canvas'), stage = cv.parentElement;
+    const stepsEl = document.getElementById('demo-steps'), textEl = document.getElementById('demo-text'), readEl = document.getElementById('demo-read');
+    const btnPlay = document.getElementById('demo-play'), btnReplay = document.getElementById('demo-replay');
+    const slider = document.getElementById('demo-alpha'), out = document.getElementById('demo-alpha-o');
+    const more = document.getElementById('demo-more');
+    const st = { init: 'magnitude', sparsity: 0.5, gran: 'block', metric: 'WD', alpha: 0.5, seed: 12 };
+    const cache = {};
+    let D = null;
+
+    // ---------- model ----------
+    function compute(full) {
+      const kb = 'b' + st.seed;
+      const block = cache[kb] || (cache[kb] = Toy.makeBlock(st.seed));
+      const km = kb + st.init + st.sparsity;
+      const M0 = cache[km] || (cache[km] = Toy.initMasks(block, st.init, st.sparsity));
+      const ks = km + st.metric;
+      const sc = cache[ks] || (cache[ks] = Toy.scores(block, M0, st.metric));
+      const kp = ks + st.gran;
+      const pr = cache[kp] || (cache[kp] = Toy.pairs(block, M0, sc, st.gran));
+      const rb = Toy.rebuild(M0, pr, st.alpha);
+      const d = { block, M0, sc, pr, M1: rb.masks, swaps: rb.swaps, npos: rb.npos, e0: Toy.error(block, M0), e1: Toy.error(block, rb.masks) };
+      d.wRank = block.mats.map((m) => BlockView.ranks(Array.from(m.W, Math.abs)));
+      const pooled = []; sc.forEach((s, i) => s.score.forEach((v, k) => pooled.push([v, i, k])));
+      pooled.sort((a, b) => a[0] - b[0]);
+      d.sRank = block.mats.map((m) => new Float64Array(m.W.length));
+      pooled.forEach((p, j) => { d.sRank[p[1]][p[2]] = j / (pooled.length - 1); });
+      // swaps animate in order of gain
+      const sw = [];
+      for (const g of pr) { const n = Math.floor(g.npos * st.alpha + 1e-9); for (let j = 0; j < n; j++) sw.push([g.grow[j][2] - g.prune[j][2], g.grow[j], g.prune[j]]); }
+      sw.sort((a, b) => b[0] - a[0]);
+      d.order = block.mats.map((m) => new Float64Array(m.W.length).fill(-1));
+      sw.forEach(([, gr, pk], j) => { const o = j / Math.max(1, sw.length - 1); d.order[gr[0]][gr[1]] = o; d.order[pk[0]][pk[1]] = o; });
+      d.extra = d.M1.map((M) => { let z = 0; for (const v of M) if (!v) z++; return (100 * z / M.length).toFixed(1) + '% pruned'; });
+      if (full || (D && D.curve && more.open)) d.curve = GRID.map((a) => Toy.error(block, Toy.rebuild(M0, pr, a).masks));
+      d.gains = Toy.gains(pr, st.alpha);
+      D = d;
+    }
+
+    // ---------- steps UI ----------
+    const stepBtns = STEPS.map((s, i) => {
+      const li = U.el('li', null, stepsEl);
+      const b = U.el('button', 'demo-step', li); b.type = 'button';
+      U.el('span', 'demo-step__n', b, String(i + 1));
+      U.el('span', 'demo-step__l', b, s.label);
+      const bar = U.el('span', 'demo-step__bar', b); U.el('i', null, bar);
+      b.addEventListener('click', () => { t = U.mqReduce.matches ? s.t1 - 0.01 : s.t0; setPlaying(!U.mqReduce.matches); draw(); });
+      return b;
+    });
+    function stepText(i) {
+      const sp = Math.round(st.sparsity * 100);
+      if (i === 0) return `Start from any one-shot mask. Here ${NAMES[st.init]} pruning removes ${sp}% of the weights.`;
+      if (i === 1) return 'Measure one error <span class="m">E</span> at the block output and backpropagate it once. Every weight gets the score <span class="m"><span class="u">|</span>W<span class="u">| · |</span>∂E/∂W<span class="u">|</span></span>.';
+      if (i === 2) return `Swap the highest-scoring pruned weights for the lowest-scoring kept ones, one for one: ${D.swaps} pairs at <span class="m">α</span> = ${Math.round(st.alpha * 100)}%.`;
+      const ch = D.e0 > 0 ? Math.round((1 - D.e1 / D.e0) * 100) : 0;
+      return `Same ${sp}% sparsity, same weight values. The block error drops from ${pct(D.e0)} to ${pct(D.e1)}${ch > 0 ? ` (${ch}% lower)` : ''}.`;
+    }
+
+    // ---------- canvas ----------
+    let geo = null, ctx = null, xPos = null, lastW = 0;
+    function layout(force) {
+      const w = Math.floor(stage.clientWidth);
+      if (!w || (w === lastW && !force)) return;
+      lastW = w;
+      geo = BlockView.geometry(w, { maxCell: 10, minCell: 3, twoLines: true });
+      ctx = U.fitCanvas(cv, w, geo.height);
+      const minX = Math.min(...geo.mats.map((m) => m.x)), maxX = Math.max(...geo.mats.map((m) => m.x + m.cols * geo.c));
+      geo.minX = minX; geo.maxX = maxX;
+      xPos = geo.mats.map((m) => {
+        const a = new Float64Array(m.rows * m.cols);
+        for (let r = 0; r < m.rows; r++) for (let c = 0; c < m.cols; c++) a[r * m.cols + c] = (m.x + (c + 0.5) * geo.c - minX) / (maxX - minX);
+        return a;
+      });
+      draw();
+    }
+
+    let t = 0, last = null, raf = 0, playing = !U.mqReduce.matches, onScreen = true;
+    if (!playing) t = STEPS[3].t1 - 0.01;
+    let lastStep = -1, lastRead = '';
+
+    function draw() {
+      if (!geo || !D) return;
+      const th = U.theme.rgb;
+      const back = prog(t, T.back, T.loop);
+      const errNow = t < T.err ? D.e0 : D.e0 + (D.e1 - D.e0) * easeOut(prog(t, T.err, T.err + 1.0));
+      const probeOn = t >= T.probe ? easeOut(prog(t, T.probe, T.probe + 0.45)) : 0;
+      const probe = {
+        fill: probeOn * (1 - back) * (0.25 + 0.75 * (D.e0 > 0 ? errNow / D.e0 : 0)),
+        pulse: bump(prog(t, T.probe, T.probe + 0.5)) + bump(prog(t, T.err + 0.9, T.err + 1.3)) * 0.6,
+        text: probeOn > 0.3 && back < 0.5 ? pct(errNow) : ''
+      };
+      BlockView.draw(ctx, geo, (mi, k) => {
+        const x = xPos[mi][k];
+        const blue = mixArr(th['bg-soft'], th.blue, 0.16 + 0.84 * Math.pow(D.wRank[mi][k], 1.1));
+        const orng = mixArr(th['bg-soft'], th.accent, 0.08 + 0.92 * Math.pow(D.sRank[mi][k], 1.7));
+        const p1 = easeOut(prog(t, T.mask + x * SWEEP, T.mask + x * SWEEP + CELL));
+        const p2 = easeOut(prog(t, T.score + (1 - x) * SWEEP, T.score + (1 - x) * SWEEP + CELL));
+        const ord = D.order[mi][k];
+        const p3 = ord >= 0 ? easeOut(prog(t, T.swap + ord * 1.6, T.swap + ord * 1.6 + 0.45)) : 0;
+        const p4 = easeOut(prog(t, T.res + x * 0.5, T.res + x * 0.5 + 0.5));
+        const kept0 = D.M0[mi][k] === 1, kept1 = D.M1[mi][k] === 1;
+        let fill = mixArr(blue, orng, p2), hollow = kept0 ? 0 : p1 * (1 - 0.5 * p2 * (1 - p4)), ring = 0, scale = 1;
+        if (!kept0 && kept1) { fill = mixArr(fill, th.accent, p3); hollow *= 1 - p3; scale = 1 + 0.45 * bump(p3); }
+        else if (kept0 && !kept1) { fill = mixArr(fill, blue, p3); hollow = p3; ring = p3; scale = 1 + 0.35 * bump(p3); }
+        else fill = mixArr(fill, blue, p4);
+        if (back > 0) { fill = mixArr(fill, blue, back); hollow *= 1 - back; ring *= 1 - back; }
+        return { fill, hollow, ring, scale };
+      }, {
+        probe,
+        extra: more.open && t >= T.res && back === 0 ? D.extra : null,
+        overlay: (c2) => {
+          // mask sweep left to right, gradient sweep right to left (backward)
+          const sweeps = [[T.mask, false, th.ink], [T.score, true, th.accent]];
+          for (const [a, rev, col] of sweeps) {
+            const f = prog(t, a, a + SWEEP + CELL * 0.5);
+            if (f <= 0 || f >= 1) continue;
+            const x = rev ? geo.maxX - (geo.maxX - geo.minX) * f : geo.minX + (geo.maxX - geo.minX) * f;
+            c2.strokeStyle = U.rgbStr(col, 0.6 * Math.sin(Math.PI * f)); c2.lineWidth = 2;
+            for (const m of geo.mats) {
+              if (x < m.x - 1 || x > m.x + m.cols * geo.c + 1) continue;
+              c2.beginPath(); c2.moveTo(x, m.y - 2); c2.lineTo(x, m.y + m.rows * geo.c + 2); c2.stroke();
+            }
+          }
+        }
+      });
+      // step track
+      let cur = 0; STEPS.forEach((s, i) => { if (t >= s.t0) cur = i; });
+      stepBtns.forEach((b, i) => {
+        const s = STEPS[i];
+        const v = i < cur ? 1 : i === cur ? prog(t, s.t0, s.t1) : 0;
+        b.classList.toggle('is-active', i === cur);
+        b.classList.toggle('is-done', i < cur);
+        b.setAttribute('aria-current', i === cur ? 'step' : 'false');
+        b.querySelector('i').style.transform = `scaleX(${v.toFixed(3)})`;
+      });
+      if (cur !== lastStep) { lastStep = cur; textEl.innerHTML = stepText(cur); }
+      // readout
+      const masked = t >= T.mask + SWEEP + CELL && back < 0.5;
+      const rebuilt = t >= T.swap + 1.0 && back < 0.5;
+      const r = [
+        ['Sparsity', masked ? pct(Toy.sparsity(rebuilt ? D.M1 : D.M0)) : '0%'],
+        ['Swapped pairs', rebuilt ? String(D.swaps) : '–'],
+        ['Block error', !masked ? '0%' : t >= T.err + 1.0 && back < 0.5 ? `${pct(D.e0)} to ${pct(D.e1)}` : pct(D.e0)]
+      ];
+      const key = r.map((x) => x[1]).join('|');
+      if (key !== lastRead) {
+        lastRead = key;
+        readEl.replaceChildren(...r.map(([k, v]) => { const s = U.el('span'); s.append(k + ' '); U.el('b', null, s, v); return s; }));
+      }
+    }
+
+    function frame(now) {
+      raf = 0;
+      if (last != null) t += Math.min(0.05, (now - last) / 1000);
+      last = now;
+      if (t >= T.loop) { t -= T.loop; lastStep = -1; }
+      draw();
+      if (playing && onScreen && !document.hidden) raf = requestAnimationFrame(frame); else last = null;
+    }
+    function schedule() { if (playing && onScreen && !document.hidden && !raf) { last = null; raf = requestAnimationFrame(frame); } }
+    function setPlaying(v) {
+      playing = v;
+      btnPlay.textContent = v ? 'Pause' : 'Play';
+      btnPlay.setAttribute('aria-pressed', v ? 'false' : 'true');
+      if (!v && raf) { cancelAnimationFrame(raf); raf = 0; }
+      schedule();
+    }
+    // a control changed: show the rebuilt result right away
+    function showResult() { t = STEPS[3].t1 - 0.4; lastStep = -1; setPlaying(false); draw(); drawCharts(); }
+
+    btnPlay.addEventListener('click', () => { if (!playing && t >= STEPS[3].t1 - 0.5) t = 0; setPlaying(!playing); });
+    btnReplay.addEventListener('click', () => { t = 0; lastStep = -1; setPlaying(true); draw(); });
+    U.$$('.seg[data-key]', fig).forEach((grp) => {
+      const key = grp.dataset.key;
+      U.seg(grp, (v) => { st[key] = key === 'sparsity' ? parseFloat(v) : v; compute(); showResult(); });
+    });
+    slider.addEventListener('input', () => { st.alpha = slider.value / 100; out.textContent = slider.value + '%'; compute(); showResult(); });
+    document.getElementById('demo-seed').addEventListener('click', () => { st.seed += 1; compute(); showResult(); });
+    more.addEventListener('toggle', () => { if (more.open) { if (!D.curve) compute(true); drawCharts(); } draw(); });
+
+    // ---------- charts inside "More options" ----------
+    const errCard = document.getElementById('demo-err'), gainCard = document.getElementById('demo-gain');
+    function box(card, h) {
+      let host = card.querySelector('.cbox'); if (!host) host = U.el('div', 'cbox', card);
+      const w = Math.max(240, Math.floor(card.clientWidth - 28));
+      host.replaceChildren();
+      const s = svg('svg', { viewBox: `0 0 ${w} ${h}`, width: w, height: h, role: 'img' }, host);
+      return { s, w, h };
+    }
+    function niceMax(v) { const e = Math.pow(10, Math.floor(Math.log10(v))); for (const m of [1, 1.25, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10]) if (m * e >= v) return m * e; return 10 * e; }
+    function drawCharts() {
+      if (!more.open || !D) return;
+      if (!D.curve) D.curve = GRID.map((a) => Toy.error(D.block, Toy.rebuild(D.M0, D.pr, a).masks));
+      // error vs alpha
+      {
+        const { s, w, h } = box(errCard, 190);
+        const m = { l: 44, r: 14, t: 16, b: 28 };
+        const ymax = niceMax(Math.max(D.e0, ...D.curve) * 1.08);
+        const X = (a) => m.l + a * (w - m.l - m.r), Y = (v) => m.t + (1 - v / ymax) * (h - m.t - m.b);
+        const g = svg('g', { class: 'grid' }, s);
+        [0, ymax / 2, ymax].forEach((v) => { svg('line', { x1: m.l, x2: w - m.r, y1: Y(v), y2: Y(v) }, g); const tx = svg('text', { x: m.l - 8, y: Y(v) + 4, 'text-anchor': 'end', class: 'tick' }, s); tx.textContent = pct(v).replace('.00%', '%'); });
+        [0, 0.25, 0.5, 0.75, 1].forEach((a) => { const tx = svg('text', { x: X(a), y: h - 8, 'text-anchor': a === 0 ? 'start' : a === 1 ? 'end' : 'middle', class: 'tick' }, s); tx.textContent = Math.round(a * 100) + '%'; });
+        svg('line', { x1: m.l, x2: w - m.r, y1: Y(D.e0), y2: Y(D.e0), style: 'stroke:var(--series-base);stroke-width:1.5' }, s);
+        const sl = svg('text', { x: m.l + 6, y: Y(D.e0) - 7, class: 'val mut' }, s); sl.textContent = 'starting mask ' + pct(D.e0);
+        svg('polyline', { points: GRID.map((a, i) => `${X(a).toFixed(1)},${Y(D.curve[i]).toFixed(1)}`).join(' '), style: 'fill:none;stroke:var(--accent);stroke-width:2;stroke-linejoin:round' }, s);
+        const cx = X(st.alpha), cy = Y(D.e1);
+        svg('line', { x1: cx, x2: cx, y1: m.t, y2: h - m.b, style: 'stroke:var(--muted);stroke-width:1' }, s);
+        svg('circle', { cx, cy, r: 7, style: 'fill:var(--bg-card)' }, s); svg('circle', { cx, cy, r: 5, style: 'fill:var(--accent)' }, s);
+        const right = cx > w * 0.62;
+        let ly = Math.max(m.t + 10, cy - 10); if (Math.abs(ly - (Y(D.e0) - 7)) < 16 && (right ? cx - 60 : cx + 10) < m.l + 150) ly = cy + 20;
+        const lb = svg('text', { x: cx + (right ? -10 : 10), y: ly, 'text-anchor': right ? 'end' : 'start', class: 'val' }, s); lb.textContent = pct(D.e1);
+        s.setAttribute('aria-label', `Block error against the rebuilding ratio: ${pct(D.e0)} with the starting mask, ${pct(D.e1)} at α = ${Math.round(st.alpha * 100)}%.`);
+      }
+      // gains of candidate pairs
+      {
+        const { s, w, h } = box(gainCard, 150);
+        const m = { l: 44, r: 14, t: 12, b: 26 };
+        const gs = D.gains;
+        if (!gs.length) { const tx = svg('text', { x: w / 2, y: h / 2, 'text-anchor': 'middle', class: 'val mut' }, s); tx.textContent = 'No pair has a positive gain with this score'; return; }
+        const gmax = gs[0][0];
+        const X = (i) => m.l + (gs.length === 1 ? 0 : (i / (gs.length - 1)) * (w - m.l - m.r));
+        const Y = (v) => m.t + (1 - Math.sqrt(v / gmax)) * (h - m.t - m.b);
+        const g = svg('g', { class: 'grid' }, s);
+        [0, gmax / 4, gmax].forEach((v) => { svg('line', { x1: m.l, x2: w - m.r, y1: Y(v), y2: Y(v) }, g); const tx = svg('text', { x: m.l - 8, y: Y(v) + 4, 'text-anchor': 'end', class: 'tick' }, s); tx.textContent = v === 0 ? '0' : v >= 1 ? v.toFixed(v >= 10 ? 0 : 1) : v.toFixed(Math.max(0, -Math.floor(Math.log10(v)) + 1)); });
+        let on = '', off = '', nOn = 0;
+        gs.forEach(([v, sw], i) => { const seg = `M${X(i).toFixed(2)},${(h - m.b).toFixed(2)}V${Y(v).toFixed(2)}`; if (sw) { on += seg; nOn++; } else off += seg; });
+        const lw = Math.max(1, Math.min(4, ((w - m.l - m.r) / gs.length) * 0.7));
+        svg('path', { d: off, style: `stroke:var(--muted);stroke-width:${lw};opacity:.5` }, s);
+        svg('path', { d: on, style: `stroke:var(--accent);stroke-width:${lw}` }, s);
+        const a0 = svg('text', { x: m.l, y: h - 6, class: 'tick' }, s); a0.textContent = 'largest gain';
+        const a1 = svg('text', { x: w - m.r, y: h - 6, 'text-anchor': 'end', class: 'tick' }, s); a1.textContent = `${gs.length} pairs`;
+        const lab = svg('text', { x: w - m.r, y: m.t + 12, 'text-anchor': 'end', class: 'val' }, s); lab.textContent = `${nOn} swapped`;
+        s.setAttribute('aria-label', `${gs.length} candidate pairs have a positive gain; ${nOn} are swapped.`);
+      }
+    }
+
+    document.addEventListener('visibilitychange', schedule);
+    U.visible(fig, (v) => { onScreen = v; if (!v && raf) { cancelAnimationFrame(raf); raf = 0; } schedule(); });
+    U.onTheme(() => { draw(); drawCharts(); });
+    let rt = 0;
+    new ResizeObserver(() => { cancelAnimationFrame(rt); rt = requestAnimationFrame(() => { layout(); drawCharts(); }); }).observe(fig);
+    compute();
+    layout(true);
+    setPlaying(playing);
+  }
+  return { init };
+})();
+
+/* Block-aware vs layer-aware error: one decoder layer, animated forward and backward. */
+const BlockFig = (() => {
+  const { clamp, prog, easeOut, svg } = U;
+  const L = 32;
+
+  const LAYOUTS = {
+    wide: {
+      vb: [1040, 420], dir: [1, 0],
+      strip: { tx: 24, ty: 31, x0: 170, x1: 1016, y: 22, h: 9 },
+      boxes: [
+        { id: 'attnBox', x: 62, y: 52, w: 484, h: 350, label: 'Self-Attention block', lx: 82, ly: 80 },
+        { id: 'mlpBox', x: 590, y: 52, w: 400, h: 350, label: 'MLP block', lx: 610, ly: 80 }
+      ],
+      nodes: {
+        X: [26, 230], Q: [150, 128], K: [150, 230], V: [150, 332], attn: [300, 230], O: [432, 230], Eatt: [510, 230],
+        gate: [668, 170], up: [668, 290], act: [800, 230], down: [906, 230], Emlp: [962, 230], Y: [1022, 230]
+      },
+      opW: { attn: 124, act: 116 }
+    },
+    tall: {
+      vb: [400, 1090], dir: [0, 1],
+      strip: { tx: 20, ty: 28, x0: 20, x1: 380, y: 40, h: 8 },
+      boxes: [
+        { id: 'attnBox', x: 14, y: 104, w: 372, h: 446, label: 'Self-Attention', lx: 30, ly: 130 },
+        { id: 'mlpBox', x: 14, y: 578, w: 372, h: 426, label: 'MLP', lx: 30, ly: 604 }
+      ],
+      nodes: {
+        X: [200, 80], Q: [100, 196], K: [200, 196], V: [300, 196], attn: [200, 300], O: [200, 394], Eatt: [200, 504],
+        gate: [138, 672], up: [262, 672], act: [200, 778], down: [200, 870], Emlp: [200, 962], Y: [200, 1062]
+      },
+      opW: { attn: 150, act: 140 }
+    }
+  };
+  const TILE = 58, OPH = 42, PR = 16;
+  const TILES = ['Q', 'K', 'V', 'O', 'gate', 'up', 'down'];
+  const SUB = { Q: 'Q', K: 'K', V: 'V', O: 'O', gate: 'gate', up: 'up', down: 'down' };
+  const EDGES = [['X', 'Q'], ['X', 'K'], ['X', 'V'], ['Q', 'attn'], ['K', 'attn'], ['V', 'attn'], ['attn', 'O'], ['O', 'Eatt'],
+    ['Eatt', 'gate'], ['Eatt', 'up'], ['gate', 'act'], ['up', 'act'], ['act', 'down'], ['down', 'Emlp'], ['Emlp', 'Y']];
+
+  // ---- timelines ----
+  const BLOCK_T = {
+    dur: 8.4,
+    fwd: [[['X-Q', 'X-K', 'X-V'], 0, .55], [['Q-attn', 'K-attn', 'V-attn'], .55, 1.05], [['attn-O'], 1.05, 1.45], [['O-Eatt'], 1.45, 1.8],
+      [['Eatt-gate', 'Eatt-up'], 3.8, 4.3], [['gate-act', 'up-act'], 4.3, 4.75], [['act-down'], 4.75, 5.15], [['down-Emlp'], 5.15, 5.5], [['Emlp-Y'], 7.4, 7.8]],
+    back: [[['O-Eatt'], 2.1, 2.45], [['attn-O'], 2.45, 2.8], [['Q-attn', 'K-attn', 'V-attn'], 2.8, 3.2],
+      [['down-Emlp'], 5.8, 6.15], [['act-down'], 6.15, 6.5], [['gate-act', 'up-act'], 6.5, 6.9]],
+    probes: [['Eatt', 1.8], ['Emlp', 5.5]],
+    flash: [[['O'], 2.45], [['Q', 'K', 'V'], 3.2], [['down'], 6.15], [['gate', 'up'], 6.9]],
+    flips: [[['Q', 'K', 'V', 'O'], 3.3, 3.75], [['gate', 'up', 'down'], 7.0, 7.45]],
+    done: 7.8
+  };
+  const LAYER_T = {
+    dur: 6.0,
+    fwd: [[['X-Q', 'X-K', 'X-V'], 0, .55], [['Q-attn', 'K-attn', 'V-attn'], .8, 1.3], [['attn-O'], 1.3, 1.7], [['O-Eatt'], 1.95, 2.3],
+      [['Eatt-gate', 'Eatt-up'], 2.3, 2.8], [['gate-act', 'up-act'], 3.05, 3.5], [['act-down'], 3.5, 3.9], [['down-Emlp'], 4.15, 4.5], [['Emlp-Y'], 4.5, 4.9]],
+    back: [],
+    local: [[['Q', 'K', 'V'], .55], [['O'], 1.7], [['gate', 'up'], 2.8], [['down'], 3.9]],
+    probes: [], flash: [], flips: [], done: 4.9
+  };
+
+  function rng(seed) { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+
+  function init() {
+    const fig = document.getElementById('bf');
+    if (!fig) return;
+    const host = document.getElementById('bf-svg');
+    const eqEl = document.getElementById('bf-eq');
+    const btnPause = document.getElementById('bf-pause');
+    const bBlock = document.getElementById('bf-block'), bLayer = document.getElementById('bf-layer');
+    let mode = 'block', orient = null, S = null;
+    let t = 0, layer = 1, last = null, raf = 0, playing = !U.mqReduce.matches, onScreen = false;
+
+    const legendEl = document.getElementById('bf-legend');
+    function setLegend() {
+      legendEl.replaceChildren();
+      const li = (style, cls, text) => { const l = U.el('li', null, legendEl); const sw = U.el('span', 'sw ' + (cls || ''), l); if (style) sw.setAttribute('style', style); l.append(text); };
+      li('background:var(--ink)', 'line', 'Forward pass');
+      if (mode === 'block') {
+        li('background:var(--accent)', 'line', 'Gradient of the block error');
+        li(null, 'grown', 'Grown back');
+        li(null, 'trimmed', 'Trimmed');
+      } else li('background:var(--blue)', 'dot', 'Error of one projection');
+    }
+    function setEq() {
+      setLegend();
+      eqEl.textContent = mode === 'block'
+        ? 'One error per block, backpropagated to every projection in it.'
+        : 'One error per projection; nothing flows back through the block.';
+    }
+
+    function build() {
+      const lay = LAYOUTS[orient];
+      const [W, H] = lay.vb, [dx, dy] = lay.dir;
+      host.replaceChildren();
+      const root = svg('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': mode === 'block'
+        ? 'One decoder layer. The error is measured at the output of the Self-Attention block and of the MLP block, and its gradient flows back to all projections of that block, whose masks are rebuilt.'
+        : 'One decoder layer. Each projection is checked only against its own output; no gradient flows through the block.' }, host);
+      const st = {};
+      // strip
+      const sl = lay.strip;
+      st.layerText = svg('text', { x: sl.tx, y: sl.ty, class: 't-ui', 'font-size': 15, 'font-weight': 650, style: 'fill:var(--ink)' }, root);
+      st.ticks = [];
+      const pitch = (sl.x1 - sl.x0) / L;
+      for (let i = 0; i < L; i++) st.ticks.push(svg('rect', { x: sl.x0 + i * pitch, y: sl.y, width: Math.max(3, pitch - (orient === 'wide' ? 6 : 3)), height: sl.h, rx: 2, style: 'fill:var(--line)' }, root));
+      // boxes
+      for (const b of lay.boxes) {
+        svg('rect', { x: b.x, y: b.y, width: b.w, height: b.h, rx: 18, style: 'fill:none;stroke:var(--muted);stroke-width:1.5;stroke-dasharray:7 6;opacity:.7' }, root);
+        const tx = svg('text', { x: b.lx, y: b.ly, class: 't-ui', 'font-size': 15, 'font-weight': 650, style: 'fill:var(--text)' }, root);
+        tx.textContent = b.label;
+      }
+      // geometry helpers
+      const N = lay.nodes;
+      const half = (id) => {
+        if (TILES.includes(id)) return TILE / 2;
+        if (id === 'attn' || id === 'act') return orient === 'wide' ? lay.opW[id] / 2 : OPH / 2;
+        if (id === 'Eatt' || id === 'Emlp') return PR;
+        return 10;
+      };
+      const port = (id, out) => { const [x, y] = N[id]; const h = half(id) * (out ? 1 : -1); return [x + dx * h, y + dy * h]; };
+      // edges
+      const gEdges = svg('g', null, root);
+      st.edges = {};
+      for (const [a, b] of EDGES) {
+        const p0 = port(a, true), p1 = port(b, false);
+        const dist = Math.abs((p1[0] - p0[0]) * dx + (p1[1] - p0[1]) * dy);
+        const d = Math.max(14, dist * 0.5);
+        const path = `M${p0[0]},${p0[1]} C${p0[0] + dx * d},${p0[1] + dy * d} ${p1[0] - dx * d},${p1[1] - dy * d} ${p1[0]},${p1[1]}`;
+        const base = svg('path', { d: path, style: 'fill:none;stroke:var(--line-strong);stroke-width:2' }, gEdges);
+        const back = svg('path', { d: path, style: 'fill:none;stroke:var(--accent);stroke-width:2.6;stroke-linecap:round;opacity:0' }, gEdges);
+        const len = base.getTotalLength();
+        st.edges[a + '-' + b] = { base, back, len };
+      }
+      // nodes
+      const gNodes = svg('g', null, root);
+      st.tiles = {};
+      const cell = 11, cg = 2, inner = 4 * cell + 3 * cg, pad = (TILE - inner) / 2;
+      for (const id of TILES) {
+        const [x, y] = N[id];
+        const g = svg('g', { transform: `translate(${x - TILE / 2},${y - TILE / 2})` }, gNodes);
+        const frame = svg('rect', { x: 0, y: 0, width: TILE, height: TILE, rx: 9, style: 'fill:var(--bg-card);stroke:var(--line-strong);stroke-width:1.5' }, g);
+        const cells = [];
+        for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) cells.push(svg('rect', { x: pad + c * (cell + cg), y: pad + r * (cell + cg), width: cell, height: cell, rx: 2 }, g));
+        const lab = svg('text', { x: TILE / 2, y: TILE + 18, 'text-anchor': 'middle', 'font-size': 16, style: 'fill:var(--ink)' }, g);
+        const w = svg('tspan', { class: 't-math' }, lab); w.textContent = 'W';
+        const s = svg('tspan', { class: 't-ui', dy: 4, 'font-size': 11, 'font-weight': 650 }, lab); s.textContent = SUB[id];
+        // local probe (layer mode)
+        const lp = svg('g', { style: 'opacity:0' }, gNodes);
+        const [px, py] = [x + TILE / 2 + 13, y]; // right of the tile, clear of its label in both layouts
+        const lpc = svg('circle', { cx: px, cy: py, r: 8, style: 'fill:var(--bg-card);stroke:var(--blue);stroke-width:2' }, lp);
+        st.tiles[id] = { frame, cells, lp, lpc, state: null };
+      }
+      for (const id of ['attn', 'act']) {
+        const [x, y] = N[id];
+        const w = orient === 'wide' ? lay.opW[id] : lay.opW[id];
+        svg('rect', { x: x - w / 2, y: y - OPH / 2, width: w, height: OPH, rx: 21, style: 'fill:var(--bg-card);stroke:var(--muted);stroke-width:1.5' }, gNodes);
+        const tx = svg('text', { x, y: y + 5, 'text-anchor': 'middle', 'font-size': 15, class: id === 'act' ? 't-math' : 't-ui', 'font-weight': id === 'act' ? 400 : 600, style: 'fill:var(--ink)' }, gNodes);
+        tx.textContent = id === 'attn' ? 'Attention' : 'SiLU(g) ⊙ u';
+      }
+      st.probes = {};
+      for (const id of ['Eatt', 'Emlp']) {
+        const [x, y] = N[id];
+        const g = svg('g', null, gNodes);
+        const dot = svg('circle', { cx: x, cy: y, r: 4, style: 'fill:var(--muted)' }, g);
+        const c = svg('circle', { cx: x, cy: y, r: PR, style: 'fill:var(--bg-card);stroke:var(--accent);stroke-width:2' }, g);
+        const tx = svg('text', { x, y: y + 6, 'text-anchor': 'middle', class: 't-math', 'font-size': 18, style: 'fill:var(--accent)' }, g);
+        tx.textContent = 'E';
+        st.probes[id] = { dot, c, tx };
+      }
+      for (const id of ['X', 'Y']) {
+        const [x, y] = N[id];
+        const tx = svg('text', { x, y: y + 6, 'text-anchor': 'middle', class: 't-math', 'font-size': 20, style: 'fill:var(--ink)' }, gNodes);
+        tx.textContent = id === 'X' ? 'X' : 'Y';
+      }
+      // pulses
+      const gP = svg('g', null, root);
+      st.pf = {}; st.pb = {};
+      for (const k in st.edges) {
+        st.pf[k] = svg('circle', { r: 5, style: 'fill:var(--ink);opacity:0' }, gP);
+        st.pb[k] = svg('circle', { r: 5, style: 'fill:var(--accent);opacity:0' }, gP);
+      }
+      S = st;
+      newLayerMasks();
+      render();
+    }
+
+    // per-layer mini masks: 8 kept / 8 pruned, plus one grow and one trim per tile
+    function newLayerMasks() {
+      for (const id of TILES) {
+        const r = rng(layer * 131 + id.length * 17 + id.charCodeAt(0));
+        const idx = Array.from({ length: 16 }, (_, i) => i).sort(() => r() - 0.5);
+        const kept = new Set(idx.slice(0, 8));
+        const mag = Array.from({ length: 16 }, () => 0.35 + 0.65 * r());
+        const prunedList = idx.slice(8), keptList = idx.slice(0, 8);
+        S.tiles[id].state = { kept, mag, grow: prunedList[Math.floor(r() * 8)], trim: keptList[Math.floor(r() * 8)] };
+      }
+    }
+
+    function render() {
+      if (!S) return;
+      const T = mode === 'block' ? BLOCK_T : LAYER_T;
+      S.layerText.textContent = `Layer ${layer} of ${L}`;
+      S.ticks.forEach((tk, i) => {
+        const done = i + 1 < layer || (i + 1 === layer && t >= T.done);
+        tk.style.fill = i + 1 === layer && !done ? 'var(--ink)' : done ? (mode === 'block' ? 'var(--accent)' : 'var(--blue)') : 'var(--line)';
+      });
+      // edges: forward progress
+      const fwdP = {}, backP = {};
+      for (const [ids, a, b] of T.fwd) for (const id of ids) fwdP[id] = Math.max(fwdP[id] || 0, prog(t, a, b));
+      for (const [ids, a, b] of T.back) for (const id of ids) backP[id] = prog(t, a, b);
+      for (const k in S.edges) {
+        const e = S.edges[k];
+        const f = fwdP[k] || 0, bp = backP[k] || 0;
+        e.base.style.stroke = f >= 1 ? 'var(--muted)' : 'var(--line-strong)';
+        const pf = S.pf[k];
+        if (f > 0 && f < 1) {
+          const pt = e.base.getPointAtLength(e.len * easeOut(f));
+          pf.setAttribute('cx', pt.x); pf.setAttribute('cy', pt.y); pf.style.opacity = 1;
+        } else pf.style.opacity = 0;
+        const pb = S.pb[k];
+        if (bp > 0) {
+          e.back.style.opacity = 0.95;
+          e.back.style.strokeDasharray = `${e.len} ${e.len}`;
+          e.back.style.strokeDashoffset = String(-e.len * (1 - bp));
+          if (bp < 1) {
+            const pt = e.base.getPointAtLength(e.len * (1 - bp));
+            pb.setAttribute('cx', pt.x); pb.setAttribute('cy', pt.y); pb.style.opacity = 1;
+          } else pb.style.opacity = 0;
+        } else { e.back.style.opacity = 0; pb.style.opacity = 0; }
+      }
+      // probes
+      for (const id in S.probes) {
+        const p = S.probes[id];
+        const show = mode === 'block';
+        p.c.style.display = show ? '' : 'none'; p.tx.style.display = show ? '' : 'none';
+        p.dot.style.display = show ? 'none' : '';
+        const hit = T.probes.find((x) => x[0] === id);
+        const v = hit ? prog(t, hit[1], hit[1] + 0.3) : 0;
+        p.c.style.fill = v > 0 ? `color-mix(in srgb, var(--accent) ${Math.round(v * 100)}%, var(--bg-card))` : 'var(--bg-card)';
+        p.tx.style.fill = v > 0.5 ? 'var(--on-accent)' : 'var(--accent)';
+        p.c.setAttribute('r', String(PR + 4 * Math.sin(Math.PI * v)));
+      }
+      // tiles
+      for (const id of TILES) {
+        const tl = S.tiles[id];
+        const fl = T.flash.find((x) => x[0].includes(id));
+        const flash = fl ? Math.max(0, 1 - Math.abs(t - fl[1]) / 0.35) : 0;
+        const flip = T.flips.find((x) => x[0].includes(id));
+        const fp = flip ? easeOut(prog(t, flip[1], flip[2])) : 0;
+        const touched = flip && t >= flip[1];
+        tl.frame.style.stroke = flash > 0 || touched ? 'var(--accent)' : 'var(--line-strong)';
+        tl.frame.style.strokeWidth = String(1.5 + 1.5 * flash + (touched ? 0.5 : 0));
+        const s = tl.state;
+        tl.cells.forEach((c, i) => {
+          let fill, op = 1, stroke = 'none', sw = 0;
+          const kept = s.kept.has(i);
+          if (i === s.grow && fp > 0) { fill = 'var(--accent)'; op = 0.35 + 0.65 * fp; }
+          else if (i === s.trim && fp > 0) { fill = 'var(--line)'; stroke = 'var(--accent)'; sw = 2 * fp; }
+          else if (kept) { fill = 'var(--blue)'; op = s.mag[i]; }
+          else fill = 'var(--line)';
+          c.style.fill = fill; c.style.fillOpacity = op; c.style.stroke = stroke; c.style.strokeWidth = sw;
+        });
+        // local probes in layer mode
+        const lo = (T.local || []).find((x) => x[0].includes(id));
+        const lv = lo ? prog(t, lo[1], lo[1] + 0.25) : 0;
+        tl.lp.style.opacity = mode === 'layer' ? String(lv > 0 ? 1 : 0.35) : '0';
+        tl.lpc.style.fill = lv > 0 ? 'var(--blue)' : 'var(--bg-card)';
+      }
+    }
+
+    function frame(now) {
+      raf = 0;
+      if (last != null) t += Math.min(0.05, (now - last) / 1000);
+      last = now;
+      const T = mode === 'block' ? BLOCK_T : LAYER_T;
+      if (t >= T.dur) { t = 0; layer = layer % L + 1; newLayerMasks(); }
+      render();
+      if (playing && onScreen && !document.hidden) raf = requestAnimationFrame(frame); else last = null;
+    }
+    function schedule() { if (playing && onScreen && !document.hidden && !raf) { last = null; raf = requestAnimationFrame(frame); } }
+    function setPlaying(v) {
+      playing = v; btnPause.textContent = v ? 'Pause' : 'Play'; btnPause.setAttribute('aria-pressed', v ? 'false' : 'true');
+      if (!v && raf) { cancelAnimationFrame(raf); raf = 0; }
+      schedule();
+    }
+    function setMode(m) {
+      mode = m;
+      bBlock.setAttribute('aria-pressed', m === 'block' ? 'true' : 'false');
+      bLayer.setAttribute('aria-pressed', m === 'layer' ? 'true' : 'false');
+      t = 0; layer = 1; setEq(); build();
+      if (!playing) { t = m === 'block' ? 7.0 : 4.6; render(); }
+    }
+    bBlock.addEventListener('click', () => setMode('block'));
+    bLayer.addEventListener('click', () => setMode('layer'));
+    btnPause.addEventListener('click', () => setPlaying(!playing));
+    function checkOrient() {
+      const o = host.clientWidth < 640 ? 'tall' : 'wide';
+      if (o !== orient) { orient = o; build(); }
+    }
+    new ResizeObserver(checkOrient).observe(host);
+    document.addEventListener('visibilitychange', schedule);
+    U.visible(fig, (v) => { onScreen = v; if (!v && raf) { cancelAnimationFrame(raf); raf = 0; } schedule(); });
+    setEq();
+    checkOrient();
+    if (!playing) { t = 7.0; render(); }
+    setPlaying(playing);
+  }
+  return { init };
+})();
+
+/* Results: numbers transcribed from the ICCAD 2025 paper (Tables I-IX). */
+const DATA = {
+  models: ['LLaMA-7B', 'LLaMA-13B', 'LLaMA2-7B', 'LLaMA2-13B', 'LLaMA3-8B', 'OPT-6.7B', 'OPT-13B'],
+  // Table I: WikiText-2 perplexity, 50% unstructured
+  t1: {
+    dense: [5.677, 5.091, 5.472, 4.884, 6.136, 10.86, 10.13],
+    magnitude: [17.26, 20.14, 16.03, 6.827, 205.5, 9.7e2, 1.2e4],
+    magnitude_b: [7.332, 6.089, 7.170, 5.955, 10.98, 13.12, 15.52],
+    sparsegpt: [7.201, 6.194, 7.005, 6.036, 9.399, 11.59, 11.15],
+    sparsegpt_nowr: [7.545, 6.311, 7.413, 6.134, 9.994, 13.13, 15.76],
+    sparsegpt_b: [7.159, 6.125, 7.004, 5.929, 9.348, 11.95, 11.93],
+    wanda: [7.254, 6.152, 6.920, 5.972, 9.821, 11.98, 11.93],
+    wanda_b: [7.118, 6.091, 6.868, 5.918, 9.451, 11.95, 11.71]
+  },
+  // Table III: N:M, WikiText-2 (LLaMA-7B, LLaMA-13B, LLaMA2-7B)
+  t3: {
+    models: ['LLaMA-7B', 'LLaMA-13B', 'LLaMA2-7B'],
+    dense: [5.677, 5.091, 5.472],
+    '4:8': { magnitude: [16.83, 13.72, 15.91], magnitude_b: [8.852, 7.137, 9.345], sparsegpt: [8.608, 7.437, 8.495], sparsegpt_b: [8.191, 7.085, 8.003] },
+    '2:4': { magnitude: [42.56, 18.32, 37.76], magnitude_b: [11.04, 9.006, 13.47], sparsegpt: [11.55, 9.116, 10.94], sparsegpt_b: [10.14, 8.517, 9.806] }
+  },
+  // Table II: LLaMA3-8B at higher sparsity
+  t2: {
+    sparsity: [60, 70, 80, 90],
+    magnitude: [3.39e4, 1.62e6, 8.55e7, 2.26e7], magnitude_b: [28.14, 2.08e2, 1.09e3, 7.55e4],
+    wanda: [23.57, 1.28e2, 8.54e2, 1.28e4], wanda_b: [22.04, 1.07e2, 5.70e2, 7.07e3]
+  },
+  // Table IV: zero-shot accuracy, 50% unstructured
+  t4: {
+    tasks: ['BoolQ', 'RTE', 'HellaSwag', 'ARC-e', 'ARC-c', 'OBQA', 'Mean'],
+    rows: [
+      ['LLaMA-7B', 'Dense', [75.08, 66.79, 56.96, 75.29, 41.89, 34.40, 58.40]],
+      ['LLaMA-7B', 'Magnitude', [54.61, 54.51, 45.47, 58.75, 33.45, 22.60, 44.89]],
+      ['LLaMA-7B', '+ LLM-Barber', [71.47, 59.93, 50.63, 69.11, 35.41, 28.20, 52.46]],
+      ['LLaMA-7B', 'Wanda', [70.98, 55.23, 51.90, 69.44, 36.86, 28.60, 52.17]],
+      ['LLaMA-7B', '+ LLM-Barber', [73.12, 56.68, 51.80, 70.32, 36.95, 28.80, 52.95]],
+      ['LLaMA2-13B', 'Dense', [80.58, 65.34, 60.05, 79.38, 48.46, 35.20, 61.50]],
+      ['LLaMA2-13B', 'Magnitude', [70.53, 55.96, 54.42, 57.68, 38.40, 27.80, 50.79]],
+      ['LLaMA2-13B', '+ LLM-Barber', [81.10, 60.29, 55.67, 75.34, 40.28, 31.20, 57.31]],
+      ['LLaMA2-13B', 'Wanda', [80.95, 60.28, 56.98, 76.30, 42.26, 31.20, 57.99]],
+      ['LLaMA2-13B', '+ LLM-Barber', [80.98, 62.82, 55.99, 76.39, 42.13, 31.40, 58.29]],
+      ['LLaMA3-8B', 'Dense', [81.35, 69.68, 60.19, 80.09, 50.60, 34.80, 62.79]],
+      ['LLaMA3-8B', 'Magnitude', [42.87, 53.07, 29.85, 46.59, 25.09, 22.00, 36.57]],
+      ['LLaMA3-8B', '+ LLM-Barber', [72.72, 54.87, 51.00, 72.05, 37.46, 27.40, 52.58]],
+      ['LLaMA3-8B', 'Wanda', [78.41, 60.29, 51.20, 71.38, 40.10, 29.40, 55.13]],
+      ['LLaMA3-8B', '+ LLM-Barber', [78.59, 61.37, 51.01, 71.46, 39.85, 29.00, 55.21]]
+    ]
+  },
+  // Table V: DSnoT vs LLM-Barber, LLaMA3-8B, 50% unstructured
+  t5: {
+    cols: ['WikiText-2', 'ARC-e', 'ARC-c', 'BoolQ', 'OBQA', 'RTE'],
+    lowerBetter: [true, false, false, false, false, false],
+    groups: [
+      ['Magnitude', [['Starting mask', [205.5, 46.59, 25.09, 42.87, 22.00, 53.07]], ['+ DSnoT', [47.52, 60.52, 32.16, 49.66, 25.20, 54.87]], ['+ LLM-Barber', [10.98, 72.05, 37.49, 72.72, 27.40, 54.87]]]],
+      ['Wanda', [['Starting mask', [9.821, 71.38, 40.10, 78.41, 29.40, 60.29]], ['+ DSnoT', [9.562, 71.25, 40.01, 75.99, 29.00, 61.81]], ['+ LLM-Barber', [9.451, 71.46, 39.85, 78.59, 29.00, 61.37]]]]
+    ]
+  },
+  // Table VI: grouping (granularity), LLaMA3-8B WikiText-2
+  t6: { cols: ['Block', 'Matrix', 'Input column', 'Output row'], rows: [['Magnitude', [10.98, 11.06, 72.48, 11.81]], ['SparseGPT', [9.380, 9.348, 9.418, 9.567]], ['Wanda', [9.626, 9.633, 9.849, 9.451]]] },
+  // Table VII: pruning metric, LLaMA3-8B WikiText-2
+  t7: { cols: ['|W|', '|∂E/∂W|', '|W| · |∂E/∂W|'], rows: [['Magnitude', [186.5, 14.43, 10.98]], ['SparseGPT', [9.544, 9.457, 9.348]], ['Wanda', [9.880, 9.699, 9.451]]] },
+  // Table VIII: FPGA (EdgeLLM), Qwen2-7B
+  t8: {
+    tasks: ['ARC-c', 'ARC-e', 'BoolQ'],
+    rows: [['GPTQ', [30.01, 1.98, 46.28, 29.88, 1.75, 64.71, 30.31, 0.65, 56.88]], ['AWQ', [28.13, 2.23, 35.38, 28.85, 2.02, 57.62, 28.47, 1.98, 51.84]], ['APTQ + LLM-Barber', [30.37, 1.92, 56.28, 30.14, 1.58, 67.16, 31.48, 0.48, 60.94]]]
+  },
+  // Table IX: GPU throughput (tokens/s)
+  t9: { cols: ['CUDA', 'Triton', 'Marlin', 'ExLlama', 'BF16 baseline'], rows: [['GPTQ', [37.38, 15.90, 38.03, 50.59, 44.30]], ['AWQ', [38.10, 16.21, 43.46, 51.63, 44.30]], ['APTQ + LLM-Barber', [38.29, 16.42, 47.13, 52.29, 44.30]]] }
+};
+
+const Results = (() => {
+  const { svg, clamp } = U;
+  const NAMES = { magnitude: 'Magnitude', sparsegpt: 'SparseGPT', wanda: 'Wanda' };
+  const fmt = (v) => {
+    if (v >= 1e4) { const e = Math.floor(Math.log10(v)); const m = Math.round((v / Math.pow(10, e)) * 100) / 100; return `${m}e${e}`; }
+    if (v >= 100) return String(Math.round(v * 10) / 10);
+    if (v >= 10) return v.toFixed(2);
+    return v.toFixed(3);
+  };
+  const TAKE = {
+    'magnitude|u': 'From a magnitude mask, LLaMA3-8B drops from 205.5 to 10.98 and OPT-13B from 1.2e4 to 15.52.',
+    'sparsegpt|u': 'From SparseGPT\'s mask with the original weights (dot), LLM-Barber also beats SparseGPT with its weight update (ring) on every LLaMA model.',
+    'wanda|u': 'Wanda masks are already strong, and all seven models still improve.',
+    'magnitude|4:8': 'Under 4:8 sparsity, rebuilding a magnitude mask roughly halves perplexity.',
+    'magnitude|2:4': 'Under 2:4 sparsity, LLaMA-7B drops from 42.56 to 11.04.',
+    'sparsegpt|4:8': 'From SparseGPT\'s 4:8 masks, every model improves.',
+    'sparsegpt|2:4': 'From SparseGPT\'s 2:4 masks, LLaMA-7B drops from 11.55 to 10.14.'
+  };
+
+  function series(method, pattern) {
+    if (pattern === 'u') {
+      const t = DATA.t1;
+      if (method === 'sparsegpt') return { models: DATA.models, dense: t.dense, base: t.sparsegpt_nowr, extra: t.sparsegpt, ours: t.sparsegpt_b };
+      return { models: DATA.models, dense: t.dense, base: t[method], ours: t[method + '_b'] };
+    }
+    const t = DATA.t3[pattern];
+    return { models: DATA.t3.models, dense: DATA.t3.dense, base: t[method], ours: t[method + '_b'] };
+  }
+
+  function logTicks(lo, hi) {
+    const out = [];
+    for (let e = Math.floor(Math.log10(lo)); e <= Math.ceil(Math.log10(hi)); e++) {
+      for (const m of [1, 2, 5]) { const v = m * Math.pow(10, e); if (v >= lo && v <= hi) out.push(v); }
+    }
+    if (out.length > 7) return out.filter((v) => /^1/.test(String(v)));
+    if (out.length < 4) {
+      const dense = [];
+      for (let e = Math.floor(Math.log10(lo)); e <= Math.ceil(Math.log10(hi)); e++) for (const m of [1, 1.5, 2, 3, 4, 5, 6, 8]) { const v = m * Math.pow(10, e); if (v >= lo && v <= hi) dense.push(v); }
+      return dense;
+    }
+    return out;
+  }
+  const tickLabel = (v) => (v >= 1e3 ? (v >= 1e6 ? v / 1e6 + 'M' : v / 1e3 + 'k') : String(v));
+
+  // ---------- dumbbell ----------
+  function initDumbbell() {
+    const fig = document.getElementById('dumb');
+    if (!fig) return;
+    const host = document.getElementById('dumb-svg');
+    const legend = document.getElementById('dumb-legend');
+    const take = document.getElementById('dumb-take');
+    const state = { method: 'magnitude', pattern: 'u' };
+    const ctl = {};
+    U.$$('.seg[data-key]', fig).forEach((grp) => {
+      ctl[grp.dataset.key] = U.seg(grp, (v) => {
+        state[grp.dataset.key] = v;
+        if (state.pattern !== 'u' && state.method === 'wanda') { state.method = 'magnitude'; ctl.method.set('magnitude'); }
+        ctl.method.disable('wanda', state.pattern !== 'u');
+        render(true);
+      });
+    });
+    let prev = null, anim = 0;
+
+    function render(animate) {
+      const S = series(state.method, state.pattern);
+      const W = Math.max(300, Math.floor(host.clientWidth));
+      const narrow = W < 560;
+      const labW = narrow ? 84 : 112, valW = narrow ? 104 : 150;
+      const rowH = narrow ? 38 : 42, top = 10, axisH = 46;
+      const H = top + S.models.length * rowH + axisH;
+      const all = [...S.dense, ...S.base, ...S.ours, ...(S.extra || [])];
+      const lo = Math.min(...all) * 0.88, hi = Math.max(...all) * 1.12;
+      const x0 = labW + 8, x1 = W - valW - 10;
+      const L = (v) => x0 + (Math.log(v) - Math.log(lo)) / (Math.log(hi) - Math.log(lo)) * (x1 - x0);
+      const target = S.models.map((m, i) => ({ m, d: L(S.dense[i]), b: L(S.base[i]), o: L(S.ours[i]), e: S.extra ? L(S.extra[i]) : null }));
+      const sameRows = prev && prev.models.join() === S.models.join() && animate && !U.mqReduce.matches;
+      const from = sameRows ? prev.pos : null;
+      const ticks = logTicks(lo, hi);
+      host.replaceChildren();
+      const s = svg('svg', { viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: 'img', 'aria-label': `WikiText-2 perplexity at 50% sparsity, ${NAMES[state.method]} starting mask${state.pattern === 'u' ? '' : ', ' + state.pattern + ' pattern'}, with and without LLM-Barber, log scale.` }, host);
+      const g = svg('g', { class: 'grid' }, s);
+      ticks.forEach((v) => {
+        svg('line', { x1: L(v), x2: L(v), y1: top - 4, y2: H - axisH + 4 }, g);
+        const tx = svg('text', { x: L(v), y: H - axisH + 20, 'text-anchor': 'middle', class: 'tick' }, s); tx.textContent = tickLabel(v);
+      });
+      const ax = svg('text', { x: 0, y: H - 3, 'text-anchor': 'start', class: 'tick' }, s); ax.textContent = 'WikiText-2 perplexity, log scale, lower is better';
+      const rows = target.map((r, i) => {
+        const y = top + i * rowH + rowH / 2;
+        const grp = svg('g', null, s);
+        const lab = svg('text', { x: 0, y: y + 5, class: 'lbl' }, grp); lab.textContent = r.m;
+        const dense = svg('line', { y1: y - 9, y2: y + 9, style: 'stroke:var(--ink);stroke-width:2;stroke-linecap:round' }, grp);
+        const conn = svg('line', { y1: y, y2: y, style: 'stroke:var(--muted);stroke-width:2' }, grp);
+        const head = svg('path', { style: 'fill:var(--muted)' }, grp);
+        const extra = S.extra ? svg('circle', { cy: y, r: 6, style: 'fill:none;stroke:var(--series-base);stroke-width:2' }, grp) : null;
+        const base = svg('circle', { cy: y, r: 6, style: 'fill:var(--series-base);stroke:var(--bg-soft);stroke-width:2' }, grp);
+        const ours = svg('circle', { cy: y, r: 6.5, style: 'fill:var(--series-ours);stroke:var(--bg-soft);stroke-width:2' }, grp);
+        const vb = svg('text', { x: W - valW + 4, y: y + 5, class: 'val mut' }, grp); vb.textContent = fmt(S.base[i]);
+        const vo = svg('text', { x: W - 2, y: y + 5, 'text-anchor': 'end', class: 'val' }, grp); vo.textContent = fmt(S.ours[i]);
+        const ax0 = W - valW + 4 + (narrow ? 42 : 50), aw = narrow ? 11 : 15;
+        svg('path', { d: `M${ax0},${y} h${aw} m-4,-3.5 l4,3.5 l-4,3.5`, style: 'stroke:var(--muted);stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round' }, grp);
+        // hover target
+        const hit = svg('rect', { x: 0, y: y - rowH / 2, width: W, height: rowH, style: 'fill:transparent' }, grp);
+        hit.addEventListener('pointermove', (ev) => {
+          const items = [U.tipRow(U.theme.c.ink, fmt(S.dense[i]), 'dense')];
+          if (S.extra) items.push(U.tipRow(U.theme.c['series-base'], fmt(S.extra[i]), 'SparseGPT with weight update'));
+          items.push(U.tipRow(U.theme.c['series-base'], fmt(S.base[i]), state.method === 'sparsegpt' && state.pattern === 'u' ? 'SparseGPT mask, original weights' : NAMES[state.method]));
+          items.push(U.tipRow(U.theme.c['series-ours'], fmt(S.ours[i]), '+ LLM-Barber'));
+          const head2 = U.el('div', null, null); head2.style.fontWeight = 700; head2.style.marginBottom = '4px'; head2.textContent = r.m;
+          U.tip([head2, ...items], ev.clientX, ev.clientY);
+          hit.style.fill = 'color-mix(in srgb, var(--ink) 4%, transparent)';
+        });
+        hit.addEventListener('pointerleave', () => { U.tipOff(); hit.style.fill = 'transparent'; });
+        return { y, dense, conn, head, base, ours, extra };
+      });
+      const place = (k) => {
+        target.forEach((t, i) => {
+          const f = from ? from[i] : t;
+          const r = rows[i];
+          const d = f.d + (t.d - f.d) * k, b = f.b + (t.b - f.b) * k, o = f.o + (t.o - f.o) * k;
+          r.dense.setAttribute('x1', d); r.dense.setAttribute('x2', d);
+          r.base.setAttribute('cx', b); r.ours.setAttribute('cx', o);
+          if (r.extra) { const e = t.e; r.extra.setAttribute('cx', e); }
+          const dir = o < b ? -1 : 1;
+          const gapB = 8, gapO = 12;
+          const xa = b + dir * gapB, xb = o - dir * gapO;
+          const show = Math.abs(o - b) > gapB + gapO + 2;
+          r.conn.setAttribute('x1', xa); r.conn.setAttribute('x2', show ? xb : xa);
+          r.head.setAttribute('d', show ? `M${xb + dir * 6},${r.y} l${-dir * 7},-4.5 v9 z` : '');
+        });
+      };
+      if (from) {
+        cancelAnimationFrame(anim);
+        const t0 = performance.now();
+        const stepF = (now) => { const k = U.ease(clamp((now - t0) / 650, 0, 1)); place(k); if (k < 1) anim = requestAnimationFrame(stepF); };
+        place(0); anim = requestAnimationFrame(stepF);
+      } else place(1);
+      prev = { models: S.models, pos: target };
+      // legend + takeaway
+      legend.replaceChildren();
+      const li = (cls, style, text) => { const l = U.el('li', null, legend); const sw = U.el('span', cls, l); if (style) sw.setAttribute('style', style); l.append(text); };
+      li('sw line', 'width:3px;height:14px;background:var(--ink)', 'Dense model');
+      if (S.extra) {
+        li('sw dot', 'background:transparent;box-shadow:inset 0 0 0 2px var(--series-base)', 'SparseGPT with its weight update');
+        li('sw dot', 'background:var(--series-base)', 'SparseGPT mask, original weights');
+      } else li('sw dot', 'background:var(--series-base)', `${NAMES[state.method]} mask`);
+      li('sw dot', 'background:var(--series-ours)', 'With LLM-Barber');
+      take.textContent = TAKE[state.method + '|' + state.pattern] || '';
+    }
+    let lastW = 0;
+    new ResizeObserver(() => { const w = host.clientWidth; if (w !== lastW) { lastW = w; render(false); } }).observe(host);
+    render(false);
+  }
+
+  // ---------- high sparsity small multiples ----------
+  function initHigh() {
+    const grid = document.getElementById('hs-grid');
+    if (!grid) return;
+    const panels = [['magnitude', 'From a magnitude mask'], ['wanda', 'From a Wanda mask']];
+    function render() {
+      grid.replaceChildren();
+      const lo = 10, hi = 1e8;
+      panels.forEach(([key, title]) => {
+        const card = U.el('div', 'res-block', grid);
+        const h4 = U.el('h4', null, card, title); h4.className = 'ui'; h4.style.font = '650 14.5px/1.3 var(--font)';
+        const host = U.el('div', null, card);
+        const W = Math.max(260, Math.floor(card.clientWidth || grid.clientWidth / 2 - 14)), H = 220;
+        const m = { l: 46, r: 64, t: 14, b: 30 };
+        const s = svg('svg', { viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: 'img' }, host);
+        const xs = DATA.t2.sparsity;
+        const X = (i) => m.l + (i / (xs.length - 1)) * (W - m.l - m.r);
+        const Y = (v) => m.t + (1 - (Math.log10(v) - Math.log10(lo)) / (Math.log10(hi) - Math.log10(lo))) * (H - m.t - m.b);
+        const g = svg('g', { class: 'grid' }, s);
+        [10, 1e3, 1e5, 1e7].forEach((v) => {
+          svg('line', { x1: m.l, x2: W - m.r, y1: Y(v), y2: Y(v) }, g);
+          const tx = svg('text', { x: m.l - 8, y: Y(v) + 4, 'text-anchor': 'end', class: 'tick' }, s); tx.textContent = v >= 1e6 ? v / 1e6 + 'M' : v >= 1e3 ? v / 1e3 + 'k' : String(v);
+        });
+        xs.forEach((p, i) => { const tx = svg('text', { x: X(i), y: H - 8, 'text-anchor': 'middle', class: 'tick' }, s); tx.textContent = p + '%'; });
+        const base = DATA.t2[key], ours = DATA.t2[key + '_b'];
+        const line = (vals, color) => {
+          svg('polyline', { points: vals.map((v, i) => `${X(i)},${Y(v)}`).join(' '), style: `fill:none;stroke:${color};stroke-width:2;stroke-linejoin:round` }, s);
+          vals.forEach((v, i) => svg('circle', { cx: X(i), cy: Y(v), r: 4.5, style: `fill:${color};stroke:var(--bg-soft);stroke-width:2` }, s));
+        };
+        line(base, 'var(--series-base)'); line(ours, 'var(--series-ours)');
+        const end = xs.length - 1;
+        let yb = Y(base[end]) + 4, yo = Y(ours[end]) + 4;
+        if (Math.abs(yb - yo) < 15) { const mid = (yb + yo) / 2; const up = base[end] >= ours[end]; yb = mid + (up ? -8 : 8); yo = mid + (up ? 8 : -8); }
+        const eb = svg('text', { x: X(end) + 9, y: yb, class: 'val mut' }, s); eb.textContent = fmt(base[end]);
+        const eo = svg('text', { x: X(end) + 9, y: yo, class: 'val' }, s); eo.textContent = fmt(ours[end]);
+        s.setAttribute('aria-label', `${title}: LLaMA3-8B WikiText-2 perplexity at 60 to 90% sparsity. Starting mask ${base.map(fmt).join(', ')}; with LLM-Barber ${ours.map(fmt).join(', ')}.`);
+        // hover columns
+        xs.forEach((p, i) => {
+          const hit = svg('rect', { x: X(i) - (W - m.l - m.r) / 6, y: m.t, width: (W - m.l - m.r) / 3, height: H - m.t - m.b, style: 'fill:transparent' }, s);
+          hit.addEventListener('pointermove', (ev) => U.tip([U.tipRow(U.theme.c['series-base'], fmt(base[i]), NAMES[key] + ` at ${p}%`), U.tipRow(U.theme.c['series-ours'], fmt(ours[i]), '+ LLM-Barber')], ev.clientX, ev.clientY));
+          hit.addEventListener('pointerleave', U.tipOff);
+        });
+      });
+    }
+    let lastW = 0;
+    new ResizeObserver(() => { const w = grid.clientWidth; if (w !== lastW) { lastW = w; render(); } }).observe(grid);
+    render();
+  }
+
+  // ---------- tables ----------
+  function table(hostId, caption, head, body) {
+    const host = document.getElementById(hostId);
+    if (!host) return;
+    const t = U.el('table', 't', host);
+    if (caption) U.el('caption', null, t, caption);
+    const th = U.el('thead', null, t); const tr = U.el('tr', null, th);
+    head.forEach((h) => { const c = U.el('th', null, tr, h); c.scope = 'col'; });
+    const tb = U.el('tbody', null, t);
+    body.forEach((row) => {
+      const r = U.el('tr', row.cls || null, tb);
+      row.cells.forEach((c, i) => {
+        const cell = U.el(i === 0 || (row.headCols && i < row.headCols) ? 'th' : 'td', c.cls || null, r, c.t);
+        if (cell.tagName === 'TH') cell.scope = 'row';
+        if (c.span) cell.rowSpan = c.span;
+      });
+    });
+    return t;
+  }
+  const best = (vals, lower, skip) => {
+    const cand = vals.filter((_, i) => !(skip && skip(i)));
+    return lower ? Math.min(...cand) : Math.max(...cand);
+  };
+
+  function initTables() {
+    // zero-shot
+    const T4 = DATA.t4;
+    const body4 = [];
+    const models = [...new Set(T4.rows.map((r) => r[0]))];
+    models.forEach((m) => {
+      const rows = T4.rows.filter((r) => r[0] === m);
+      const bestCol = T4.tasks.map((_, j) => Math.max(...rows.filter((r) => r[1] !== 'Dense').map((r) => r[2][j])));
+      rows.forEach((r, k) => {
+        const cells = [{ t: k === 0 ? m : '' }, { t: r[1] }];
+        r[2].forEach((v, j) => cells.push({ t: v.toFixed(2), cls: r[1] !== 'Dense' && v === bestCol[j] ? 'best' : (r[1] === 'Dense' ? 'mut' : null) }));
+        body4.push({ cls: [r[1].startsWith('+') ? 'ours' : '', k === 0 ? 'grp' : ''].join(' ').trim() || null, cells, headCols: 2 });
+      });
+    });
+    table('zs', null, ['Model', 'Method', ...T4.tasks], body4).classList.add('lead2');
+
+    // DSnoT
+    const T5 = DATA.t5; const body5 = [];
+    T5.groups.forEach(([g, rows]) => {
+      const bests = T5.cols.map((_, j) => best(rows.map((r) => r[1][j]), T5.lowerBetter[j]));
+      rows.forEach((r, k) => {
+        const cells = [{ t: k === 0 ? g : '' }, { t: r[0] }];
+        r[1].forEach((v, j) => cells.push({ t: j === 0 ? fmt(v) : v.toFixed(2), cls: v === bests[j] ? 'best' : null }));
+        body5.push({ cls: [r[0] === '+ LLM-Barber' ? 'ours' : '', k === 0 ? 'grp' : ''].join(' ').trim() || null, cells, headCols: 2 });
+      });
+    });
+    table('dsnot', null, ['Starting mask (50%)', 'Method', 'WikiText-2 (lower is better)', 'ARC-e', 'ARC-c', 'BoolQ', 'OBQA', 'RTE'], body5).classList.add('lead2');
+
+    // granularity
+    const T6 = DATA.t6;
+    table('ab-gran', null, ['Starting mask', ...T6.cols], T6.rows.map(([n, v]) => {
+      const b = Math.min(...v);
+      return { cells: [{ t: n }, ...v.map((x) => ({ t: fmt(x), cls: x === b ? 'best' : null }))] };
+    }));
+    const T7 = DATA.t7;
+    table('ab-metric', null, ['Starting mask', ...T7.cols], T7.rows.map(([n, v]) => {
+      const b = Math.min(...v);
+      return { cells: [{ t: n }, ...v.map((x) => ({ t: fmt(x), cls: x === b ? 'best' : null }))] };
+    }));
+    // deployment
+    const T8 = DATA.t8;
+    const head8 = ['Method']; T8.tasks.forEach((t) => head8.push(`${t} tok/s`, `${t} ms`, `${t} acc.`));
+    table('dep-fpga', null, head8, T8.rows.map(([n, v]) => ({ cls: n.includes('Barber') ? 'ours' : null, cells: [{ t: n }, ...v.map((x) => ({ t: x.toFixed(2) }))] })));
+    const T9 = DATA.t9;
+    table('dep-gpu', null, ['Method', ...T9.cols], T9.rows.map(([n, v]) => ({ cls: n.includes('Barber') ? 'ours' : null, cells: [{ t: n }, ...v.map((x) => ({ t: x.toFixed(2) }))] })));
+  }
+
+  function init() { initDumbbell(); initHigh(); initTables(); }
+  return { init };
+})();
+
+Kit.boot([['demo', () => Demo.init()], ['blockfig', () => BlockFig.init()], ['results', () => Results.init()]]);
+</script>
+</body>
+</html>
