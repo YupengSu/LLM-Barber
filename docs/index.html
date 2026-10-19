@@ -40,7 +40,7 @@
    Tokens, type and chrome come from the homepage (homepage.css):
    UCSB navy + white, quiet gold, Inter + Newsreader.
    Each project adds its own accent, title art and figures.
-   Layout: homepage frame (1080px), left-aligned reading column (~70ch); figures use the full frame.
+   Layout: homepage frame (1080px). Every block (text, equations, figures, tables, code) spans the same column.
    =========================================================== */
 :root {
   --navy: #003660; --navy-700: #012a4d; --blue: #0a5bb5; --blue-600: #0d68cf; --gold: #e0a021;
@@ -165,8 +165,8 @@ input[type="range"] { width: 100%; accent-color: var(--accent); height: 28px; ma
 .hero { padding-block: clamp(28px, 4.5vw, 56px) clamp(24px, 3vw, 34px); }
 .nw { white-space: nowrap; }
 .hero__venue { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; font-size: .9rem; color: var(--muted); }
-.hero__subtitle { margin-top: 16px; max-width: 40ch; text-wrap: balance; font-family: var(--serif); font-weight: 600; font-size: clamp(1.35rem, 2.6vw, 1.85rem); line-height: 1.22; letter-spacing: -.01em; color: var(--ink); }
-.hero__tagline { margin-top: 10px; max-width: 62ch; font-size: 1.05rem; color: var(--text); }
+.hero__subtitle { margin-top: 16px; text-wrap: balance; font-family: var(--serif); font-weight: 600; font-size: clamp(1.35rem, 2.6vw, 1.85rem); line-height: 1.22; letter-spacing: -.01em; color: var(--ink); }
+.hero__tagline { margin-top: 10px; font-size: 1.05rem; color: var(--text); }
 .hero__authors { margin-top: 22px; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 3px 16px; font-size: 1rem; font-weight: 500; color: var(--ink); }
 .hero__authors li { white-space: nowrap; }
 .hero__authors a { color: var(--ink); }
@@ -183,12 +183,12 @@ input[type="range"] { width: 100%; accent-color: var(--accent); height: 28px; ma
 .sub { margin-top: clamp(34px, 5vw, 56px); display: grid; gap: 16px; }
 .sub:first-child { margin-top: 0; }
 .sub__title { font-family: var(--serif); font-size: 1.25rem; font-weight: 600; letter-spacing: -.005em; line-height: 1.25; }
-.prose { max-width: 70ch; display: grid; gap: 13px; }
+.prose { display: grid; gap: 13px; }
 .prose p { font-size: 1.01rem; text-wrap: pretty; }
 .lede { font-size: 1.08rem; color: var(--ink); }
-.note { font-size: .86rem; color: var(--muted); max-width: 80ch; }
+.note { font-size: .86rem; color: var(--muted); }
 .callout { border-left: 3px solid var(--accent); background: var(--bg-soft); padding: 12px 16px; border-radius: 0 12px 12px 0; color: var(--text); }
-.dots { list-style: none; padding: 0; display: grid; gap: 10px; max-width: 70ch; }
+.dots { list-style: none; padding: 0; display: grid; gap: 10px; }
 .dots li { position: relative; padding-left: 20px; }
 .dots li::before { content: ""; position: absolute; left: 3px; top: .62em; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
 .kv { list-style: none; padding: 0; display: grid; gap: 9px; }
@@ -202,14 +202,14 @@ input[type="range"] { width: 100%; accent-color: var(--accent); height: 28px; ma
 /* ---------- figures ---------- */
 .bench { background: var(--bg-soft); border-radius: var(--radius); padding: clamp(14px, 2.4vw, 26px); }
 .card { background: var(--bg-card); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow-sm); }
-.fig-cap { margin-top: 12px; max-width: 80ch; font-size: .9rem; line-height: 1.58; color: var(--muted); }
+.fig-cap { margin-top: 12px; font-size: .9rem; line-height: 1.58; color: var(--muted); }
 .fig-cap b { color: var(--ink); font-weight: 600; }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; padding: 0; list-style: none; font-size: .82rem; color: var(--text); }
 .legend li { display: inline-flex; align-items: center; gap: 7px; }
 .sw { width: 12px; height: 12px; border-radius: 3px; flex: none; display: inline-block; }
 .sw.line { width: 18px; height: 3px; border-radius: 2px; }
 .sw.dot { border-radius: 50%; }
-.eq { padding: 14px 18px; background: var(--bg-soft); border-radius: 12px; overflow-x: auto; max-width: 70ch; display: grid; gap: 6px; }
+.eq { padding: 14px 18px; background: var(--bg-soft); border-radius: var(--radius); overflow-x: auto; display: grid; gap: 6px; }
 .eq math { font-family: var(--font-math); font-size: 1.3rem; }
 /* fences marked .f come from a math font when one is installed, so they stretch around fractions */
 .eq mo.f { font-family: "STIX Two Math", "Cambria Math", "Latin Modern Math", var(--font-math); }
@@ -264,7 +264,6 @@ pre.code .f { color: var(--accent); font-weight: 600; }
   table.map td:first-child { padding-bottom: 2px; border-bottom: 0; }
   table.map td code { white-space: normal; overflow-wrap: anywhere; }
 }
-.cite { max-width: 900px; }
 
 /* ---------- footer & back-to-top (homepage) ---------- */
 .footer { border-top: 1px solid var(--line); margin-top: 8px; }
@@ -325,7 +324,7 @@ pre.code .f { color: var(--accent); font-weight: 600; }
 .demo-step.is-done .demo-step__n { background: var(--accent); color: var(--on-accent); }
 .demo-step.is-active .demo-step__bar i { background-image: repeating-linear-gradient(-45deg, var(--accent) 0 6px, var(--blue) 6px 12px); background-size: 16.97px 100%; animation: pole 1s linear infinite; }
 .demo-ctl { display: flex; gap: 6px; }
-.demo-text { margin: 16px 0 8px; min-height: 3.2em; max-width: 72ch; font-size: 1.02rem; line-height: 1.6; color: var(--ink); }
+.demo-text { margin: 16px 0 8px; min-height: 3.2em; font-size: 1.02rem; line-height: 1.6; color: var(--ink); }
 .demo-stage canvas { display: block; width: 100%; }
 .demo-foot { margin-top: 12px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 24px; }
 .readout { display: flex; flex-wrap: wrap; gap: 4px 20px; font-size: .86rem; color: var(--text); }
@@ -488,7 +487,7 @@ svg .t-math { font-family: var(--font-math); font-style: italic; font-weight: 50
     <ol class="steps">
       <li class="step">
         <h3 class="sub__title step__head"><span class="step__n" aria-hidden="true">1</span>Measure the error at the block</h3>
-        <div class="prose"><p>Layer-wise pruners fit each projection to its own output, <span class="m"><span class="u">‖</span>WX <span class="u">− (</span>W <span class="u">⊙</span> M<span class="u">)</span>X<span class="u">‖²</span></span>, and the small biases accumulate from layer to layer. LLM-Barber takes one error at the output of the whole block, so the masks of all its projections are judged together:</p></div>
+        <div class="prose"><p>Layer-wise pruners fit each projection to its own output, <span class="m"><span class="u">‖</span>WX <span class="u">− (</span>W <span class="u">⊙</span> M<span class="u">)</span>X<span class="u">‖²</span></span>, and the small biases accumulate from layer to layer. <span class="nw">LLM-Barber</span> takes one error at the output of the whole block, so the masks of all its projections are judged together:</p></div>
         <div class="eq" role="group" aria-label="Block-aware reconstruction error">
           <math display="block"><mrow><mi>E</mi><mo>=</mo><msubsup><mrow><mo class="f">‖</mo><mi>Block</mi><mo>(</mo><mi>W</mi><mo>,</mo><mi>X</mi><mo>)</mo><mo>−</mo><mi>Block</mi><mo>(</mo><mi>W</mi><mo>⊙</mo><mi>M</mi><mo>,</mo><mi>X</mi><mo>)</mo><mo class="f">‖</mo></mrow><mn>2</mn><mn>2</mn></msubsup></mrow></math>
         </div>
@@ -2012,7 +2011,7 @@ const Results = (() => {
         li('sw dot', 'background:var(--series-base)', 'SparseGPT mask, original weights');
       } else li('sw dot', 'background:var(--series-base)', `${NAMES[state.method]} mask`);
       li('sw dot', 'background:var(--series-ours)', 'With LLM-Barber');
-      take.textContent = TAKE[state.method + '|' + state.pattern] || '';
+      take.innerHTML = (TAKE[state.method + '|' + state.pattern] || '').replace(/LLM-Barber/g, '<span class="nw">LLM-Barber</span>');
     }
     let lastW = 0;
     new ResizeObserver(() => { const w = host.clientWidth; if (w !== lastW) { lastW = w; render(false); } }).observe(host);
