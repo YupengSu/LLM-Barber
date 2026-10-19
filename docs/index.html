@@ -33,7 +33,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600;1,6..72,500&amp;display=swap">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,300;125,850&amp;text=-BLMaber&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,700&amp;display=swap">
 <style>
 :root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
 [hidden] { display: none !important; }
@@ -41,9 +41,10 @@
    Project-page kit for yupengsu.github.io
    Tokens, type and chrome come from the homepage (homepage.css):
    UCSB navy + white, quiet gold, Inter + Newsreader.
-   Each project adds only its accent, one detail of the title wordmark and its figures.
-   Layout: homepage frame (1080px). Every block (text, equations, figures, tables, code) spans the same column;
-   no block sets its own max-width.
+   Each project brings its own display face (--display), palette, title art and figures; the kit keeps
+   the chrome, the type scale and the control sizes the same on every page.
+   Layout: homepage frame (1080px) with one editorial grid: a text column (--col-a) and a figure column
+   (--col-b). Every row fills the frame: either both columns (text next to its figure) or one full-width block.
    =========================================================== */
 :root {
   --navy: #003660; --navy-700: #012a4d; --blue: #0a5bb5; --blue-600: #0d68cf; --gold: #e0a021;
@@ -57,6 +58,10 @@
   --serif: "Newsreader", Georgia, "Times New Roman", serif;
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
   --font-math: "Newsreader", "STIX Two Math", "Cambria Math", Georgia, serif;
+  --display: var(--serif); /* a project sets its own display face for the title, nav name and headings */
+  /* type scale and grid, shared by every page */
+  --fs-cap: .875rem; --fs-ui: .86rem; --fs-body: 1.0625rem; --fs-lead: 1.125rem; --fs-h3: 1.36rem; --fs-h2: clamp(1.9rem, 3.1vw, 2.4rem);
+  --col-a: 5fr; --col-b: 7fr; --col-gap: clamp(28px, 4.6vw, 64px); --row-gap: clamp(56px, 7.5vw, 96px);
   --ease: cubic-bezier(.2, .7, .2, 1);
   /* project slots: a project stylesheet overrides these */
   --accent: #e0a021; --accent-soft: #fbf0d9; --on-accent: #1d1406; --accent-ink: #94650a;
@@ -116,7 +121,7 @@ code { font-family: var(--mono); font-size: .86em; }
 .nav__home { color: var(--muted); }
 .nav__home:hover { color: var(--blue); }
 .nav__sep { color: var(--line-strong); font-weight: 400; }
-.nav__here { color: var(--ink); overflow: hidden; text-overflow: ellipsis; }
+.nav__here { color: var(--ink); overflow: hidden; text-overflow: ellipsis; font-family: var(--display); }
 .nav__links { display: flex; align-items: center; gap: 4px; }
 .nav__links a { color: var(--muted); font-weight: 500; font-size: .92rem; padding: 7px 11px; border-radius: 8px; position: relative; transition: color .18s, background .18s; }
 .nav__links a:hover { color: var(--ink); background: var(--bg-soft); }
@@ -146,7 +151,7 @@ code { font-family: var(--mono); font-size: .86em; }
 .btn--primary { background: var(--navy); border-color: var(--navy); color: var(--on-navy); }
 .btn--primary svg { color: currentColor; }
 .btn--primary:hover { background: var(--blue); border-color: var(--blue); color: var(--on-navy); }
-.btn--sm { min-height: 32px; padding: 0 11px; font-size: .84rem; border-radius: 8px; box-shadow: none; }
+.btn--sm { min-height: 32px; padding: 0 12px; font-size: var(--fs-ui); border-radius: 8px; box-shadow: none; }
 .btn--sm:hover { transform: none; box-shadow: none; }
 .btn--icon { width: 32px; padding: 0; justify-content: center; }
 .btn[disabled] { opacity: .45; cursor: not-allowed; transform: none; border-color: var(--line); }
@@ -155,9 +160,9 @@ code { font-family: var(--mono); font-size: .86em; }
 .shield__v { background: var(--navy); color: var(--on-navy); padding: 5px 11px; font-variant-numeric: tabular-nums; }
 .ctl-row { display: flex; flex-wrap: wrap; gap: 14px 22px; align-items: flex-end; }
 .ctl { display: grid; gap: 6px; min-width: 0; }
-.ctl-label { font-size: .8rem; font-weight: 600; color: var(--muted); }
+.ctl-label { font-size: .78rem; font-weight: 600; color: var(--muted); }
 .seg { display: inline-flex; flex-wrap: wrap; gap: 2px; padding: 3px; border-radius: 10px; background: var(--line); }
-.seg button { appearance: none; border: 0; background: transparent; color: var(--muted); font: 600 .84rem/1 var(--font); padding: 8px 12px; border-radius: 8px; cursor: pointer; white-space: nowrap; }
+.seg button { appearance: none; border: 0; background: transparent; color: var(--muted); font: 600 var(--fs-ui)/1 var(--font); height: 30px; padding: 0 12px; border-radius: 8px; cursor: pointer; white-space: nowrap; }
 .seg button:hover { color: var(--ink); }
 .seg button[aria-pressed="true"] { background: var(--bg-card); color: var(--ink); box-shadow: var(--shadow-sm); }
 .seg button[disabled] { opacity: .4; cursor: not-allowed; }
@@ -168,8 +173,8 @@ input[type="range"] { width: 100%; accent-color: var(--accent); height: 28px; ma
 .hero { padding-block: clamp(28px, 4.5vw, 56px) clamp(24px, 3vw, 34px); }
 .nw { white-space: nowrap; }
 .hero__venue { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; font-size: .9rem; color: var(--muted); }
-.hero__subtitle { margin-top: 16px; text-wrap: balance; font-family: var(--serif); font-weight: 600; font-size: clamp(1.35rem, 2.6vw, 1.85rem); line-height: 1.22; letter-spacing: -.01em; color: var(--ink); }
-.hero__tagline { margin-top: 10px; font-size: 1.05rem; color: var(--text); }
+.hero__subtitle { margin-top: 18px; text-wrap: balance; font-family: var(--serif); font-weight: 600; font-size: clamp(1.35rem, 2.5vw, 1.8rem); line-height: 1.24; letter-spacing: -.01em; color: var(--ink); }
+.hero__tagline { margin-top: 10px; font-size: var(--fs-lead); line-height: 1.6; color: var(--text); text-wrap: pretty; }
 .hero__authors { margin-top: 22px; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 3px 16px; font-size: 1rem; font-weight: 500; color: var(--ink); }
 .hero__authors li { white-space: nowrap; }
 .hero__authors a { color: var(--ink); }
@@ -178,20 +183,62 @@ input[type="range"] { width: 100%; accent-color: var(--accent); height: 28px; ma
 .hero__affil { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 2px 18px; font-size: .88rem; color: var(--muted); }
 .hero__affil sup { font-weight: 600; margin-right: 2px; }
 .hero__links { margin-top: 24px; display: flex; flex-wrap: wrap; gap: 8px; }
-/* one wordmark for every page: Archivo expanded, heavy; a project styles only its detail span */
-.title-art { margin-top: 18px; color: var(--ink); font-family: "Archivo", var(--font); font-stretch: 125%; font-weight: 850; font-size: clamp(46px, 8.8vw, 94px); line-height: .92; letter-spacing: -.028em; }
+/* the title art: one size for every page, the face and the detail are the project's */
+.title-art { margin-top: 16px; color: var(--ink); font-family: var(--display); font-weight: 700; font-size: clamp(54px, 9vw, 104px); line-height: .96; letter-spacing: -.02em; }
 
 /* ---------- sections ---------- */
-.section { padding-block: clamp(38px, 5.5vw, 60px); border-top: 1px solid var(--line); }
-.section__head { display: grid; gap: 12px; margin-bottom: clamp(20px, 3vw, 30px); }
-.section__title { font-family: var(--serif); font-size: 1.55rem; font-weight: 600; letter-spacing: -.01em; line-height: 1.2; }
+.section { padding-block: clamp(52px, 7vw, 88px); border-top: 1px solid var(--line); }
+.section__head { display: grid; gap: 12px; margin-bottom: clamp(24px, 3.4vw, 36px); }
+.section__title { font-family: var(--display); font-size: var(--fs-h2); font-weight: 600; letter-spacing: -.015em; line-height: 1.1; }
+
+/* ---------- the editorial grid: text next to its figure ---------- */
+.sec-head { display: grid; grid-template-columns: minmax(0, var(--col-a)) minmax(0, var(--col-b)); column-gap: var(--col-gap); row-gap: 12px; align-items: baseline; margin-bottom: clamp(32px, 4.4vw, 52px); }
+.sec-head .lede { font-size: var(--fs-lead); line-height: 1.6; color: var(--text); text-wrap: pretty; }
+.story { display: grid; grid-template-columns: minmax(0, var(--col-a)) minmax(0, var(--col-b)); column-gap: var(--col-gap); row-gap: 20px; align-items: start; }
+.story--flip { grid-template-columns: minmax(0, var(--col-b)) minmax(0, var(--col-a)); }
+.story--flip > .story__text { order: 2; }
+.story + .story, .story + .wide, .wide + .story, .wide + .wide { margin-top: var(--row-gap); }
+.story__text { display: grid; gap: 14px; align-content: start; min-width: 0; }
+.story__text p { font-size: var(--fs-body); line-height: 1.7; text-wrap: pretty; }
+.story__text p.note { font-size: var(--fs-cap); line-height: 1.55; }
+.story__text .eq { margin-block: 4px; }
+.story .eq math { font-size: 1.2rem; } /* equations inside a row; a long one goes to the figure column */
+.story__fig { display: grid; gap: 12px; align-content: start; min-width: 0; }
+.story__title { font-family: var(--display); font-size: var(--fs-h3); font-weight: 600; line-height: 1.2; letter-spacing: -.01em; color: var(--ink); text-wrap: balance; }
+@media (min-width: 961px) { .story__text--sticky { position: sticky; top: 92px; } }
+@media (max-width: 960px) {
+  .story, .story--flip, .sec-head { grid-template-columns: minmax(0, 1fr); }
+  .story--flip > .story__text { order: 0; }
+}
+/* a head row on the grid: a kicker and title on the left, their numbers or note on the right */
+.split { display: grid; grid-template-columns: minmax(0, var(--col-a)) minmax(0, var(--col-b)); column-gap: var(--col-gap); row-gap: 16px; align-items: end; }
+.split__a { display: grid; gap: 10px; align-content: start; }
+.split + .panel, .split + figure { margin-top: clamp(20px, 2.6vw, 28px); }
+@media (max-width: 960px) { .split { grid-template-columns: minmax(0, 1fr); } }
+.kicker { display: inline-flex; align-items: center; gap: 8px; font: 700 .74rem/1.2 var(--font); letter-spacing: .08em; text-transform: uppercase; color: var(--accent-ink); }
+/* big numbers: a value (often before -> after) and one line that says what it is */
+.bigs { display: grid; gap: 16px; }
+.big { display: grid; gap: 3px; align-content: start; }
+.big__v { font-family: var(--display); font-weight: 700; font-size: clamp(1.75rem, 2.8vw, 2.2rem); line-height: 1.05; color: var(--ink); font-variant-numeric: tabular-nums lining-nums; letter-spacing: -.01em; }
+.big__v .from { color: var(--muted); font-weight: 500; }
+.big__v .arr { color: var(--line-strong); font-weight: 400; margin: 0 .12em; }
+.big__v .to { color: var(--accent-ink); }
+.big__v small { font-size: .55em; font-weight: 600; color: var(--muted); margin-left: .12em; }
+.big__l { font-size: var(--fs-cap); line-height: 1.5; color: var(--muted); }
+/* a row of big numbers: each takes an equal share, but never less than its value */
+.bigs--row { display: flex; flex-wrap: wrap; gap: 16px 28px; }
+.bigs--row .big { flex: 1 1 0; }
+.bigs--row .big__v { white-space: nowrap; }
+@media (max-width: 560px) { .bigs--row { flex-direction: column; gap: 14px; } }
+.panel { background: var(--bg-card); border: 1px solid var(--line); border-radius: var(--radius); padding: clamp(14px, 2.2vw, 22px); min-width: 0; }
+.panel--soft { background: var(--bg-soft); border-color: transparent; }
 .sub { margin-top: clamp(34px, 5vw, 56px); display: grid; gap: 16px; }
 .sub:first-child { margin-top: 0; }
-.sub__title { font-family: var(--serif); font-size: 1.25rem; font-weight: 600; letter-spacing: -.005em; line-height: 1.25; }
+.sub__title { font-family: var(--display); font-size: var(--fs-h3); font-weight: 600; letter-spacing: -.005em; line-height: 1.25; }
 .prose { display: grid; gap: 13px; }
-.prose p { font-size: 1.01rem; text-wrap: pretty; }
+.prose p { font-size: var(--fs-body); line-height: 1.7; text-wrap: pretty; }
 .lede { font-size: 1.08rem; color: var(--ink); }
-.note { font-size: .86rem; color: var(--muted); }
+.note { font-size: var(--fs-cap); line-height: 1.55; color: var(--muted); }
 .callout { border-left: 3px solid var(--accent); background: var(--bg-soft); padding: 12px 16px; border-radius: 0 12px 12px 0; color: var(--text); }
 .dots { list-style: none; padding: 0; display: grid; gap: 10px; }
 .dots li { position: relative; padding-left: 20px; }
@@ -238,7 +285,7 @@ input[type="range"] { width: 100%; accent-color: var(--accent); height: 28px; ma
 /* ---------- figures ---------- */
 .bench { background: var(--bg-soft); border-radius: var(--radius); padding: clamp(14px, 2.4vw, 26px); }
 .card { background: var(--bg-card); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow-sm); }
-.fig-cap { margin-top: 12px; font-size: .9rem; line-height: 1.58; color: var(--muted); }
+.fig-cap { margin-top: 12px; font-size: var(--fs-cap); line-height: 1.58; color: var(--muted); }
 .fig-cap b { color: var(--ink); font-weight: 600; }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; padding: 0; list-style: none; font-size: .82rem; color: var(--text); }
 .legend li { display: inline-flex; align-items: center; gap: 7px; }
@@ -250,14 +297,25 @@ input[type="range"] { width: 100%; accent-color: var(--accent); height: 28px; ma
 /* fences marked .f come from a math font when one is installed, so they stretch around fractions */
 .eq mo.f { font-family: "STIX Two Math", "Cambria Math", "Latin Modern Math", var(--font-math); }
 .eq .tag { font-size: .8rem; color: var(--muted); }
+/* an equation box in the figure column, with a title; .eq-wide / .eq-narrow are two layouts of one equation, the narrow one for phones */
+.eq--fig { gap: 10px; padding: 16px 20px; }
+.eq--fig .fig-title { text-align: left; }
+.eq--fig .tag { font-size: var(--fs-cap); line-height: 1.55; text-align: left; }
+.eq-narrow { display: none; }
+.eq .lines mtd { padding: 2px 0; }
+.eq .lines > mtr > mtd:first-child { text-align: right; padding-right: .3em; }
+.eq .lines > mtr > mtd:last-child { text-align: left; }
 .eq-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 22px; }
-@media (max-width: 560px) { .eq { padding: 12px 14px; } .eq math { font-size: 1.08rem; } }
+@media (max-width: 560px) { .eq, .eq--fig { padding: 12px 14px; } .eq math, .story .eq math { font-size: 1.08rem; } .eq-wide { display: none; } .eq-narrow { display: revert; } }
+@media (max-width: 380px) { .eq math, .story .eq math { font-size: 1rem; } }
 .tip { position: fixed; z-index: 70; pointer-events: none; background: var(--ink); color: var(--bg); border-radius: 8px; padding: 8px 10px; font: 500 .8rem/1.4 var(--font); box-shadow: var(--shadow-lg); max-width: 260px; opacity: 0; transition: opacity .12s; }
 .tip.on { opacity: 1; }
 .tip b { color: inherit; font-weight: 700; font-variant-numeric: tabular-nums; }
 .tip .row { display: flex; align-items: center; gap: 8px; }
 .tip .key { width: 12px; height: 3px; border-radius: 2px; flex: none; }
-svg text.tick { font: 500 12px var(--font); fill: var(--muted); }
+svg text.tick, svg .tl, svg .tx { font: 500 11.5px var(--font); fill: var(--muted); font-variant-numeric: tabular-nums; }
+svg .tl-ink, svg .tx-ink { font: 600 12px var(--font); fill: var(--text); font-variant-numeric: tabular-nums; }
+svg .vl, svg .tx-strong { font: 700 12.5px var(--font); fill: var(--ink); font-variant-numeric: tabular-nums; }
 svg text.lbl { font: 600 13px var(--font); fill: var(--ink); }
 svg text.val { font: 600 12.5px var(--font); fill: var(--ink); font-variant-numeric: tabular-nums; }
 svg text.val.mut { fill: var(--muted); font-weight: 500; }
@@ -307,9 +365,11 @@ details.more > summary::-webkit-details-marker { display: none; }
 details.more > summary::before { content: ""; width: 6px; height: 6px; margin-top: -2px; border-right: 2px solid var(--blue); border-bottom: 2px solid var(--blue); transform: rotate(-45deg); transition: transform .2s var(--ease); }
 details.more > summary:hover { border-color: var(--blue); }
 details.more[open] > summary { margin-bottom: 16px; }
+/* a fold after the last row of a section */
+details.more.more--after { margin-top: clamp(40px, 5vw, 56px); }
 details.more[open] > summary::before { transform: rotate(45deg); margin-top: -5px; }
 .more-body { display: grid; gap: clamp(26px, 3.4vw, 34px); }
-.more-h { font-family: var(--serif); font-size: 1.12rem; font-weight: 600; }
+.more-h { font-family: var(--display); font-size: 1.15rem; font-weight: 600; }
 .more-p { font-size: .94rem; text-wrap: pretty; }
 
 /* ---------- code & citation ---------- */
@@ -318,9 +378,11 @@ pre.code .c { color: var(--muted); }
 pre.code .f { color: var(--accent-ink); font-weight: 600; }
 pre.code .k { color: var(--blue); font-weight: 600; }
 .code-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+.code-grid > div { display: grid; grid-template-rows: auto 1fr; min-width: 0; }
 @media (max-width: 860px) { .code-grid { grid-template-columns: minmax(0, 1fr); } }
 .cite .note { margin-top: 14px; }
-.code-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 8px; font-size: .86rem; font-weight: 600; color: var(--ink); }
+.code-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 4px 12px; margin-bottom: 8px; font-size: .86rem; font-weight: 600; color: var(--ink); }
+.code-head code { white-space: normal; overflow-wrap: anywhere; }
 .map td:first-child { white-space: normal; min-width: 170px; color: var(--ink); font-weight: 600; }
 .map td:last-child { white-space: normal; text-align: left; min-width: 260px; }
 .map th:last-child { text-align: left; }
@@ -345,35 +407,53 @@ pre.code .k { color: var(--blue); font-weight: 600; }
 }
 
 /* ===========================================================
-   LLM-Barber module: barber-orange accent (from the paper's figures),
-   barber-pole title art, and the figures that animate the algorithm.
+   LLM-Barber module, after the paper's figures: blue is a weight, green a gradient, orange a score
+   (and a weight grown back), brown the dashed frame of a block and its error. Playfair Display for
+   the display face; the hyphen of the title is a turning barber pole. The method is a worksheet:
+   three numbered steps, each a statement over a wide figure.
    =========================================================== */
-:root { --accent: #e2661a; --accent-soft: #fbe0cc; --on-accent: #1d1006; --accent-ink: #b24d0e; --series-ours: #e2661a; }
+:root {
+  --display: "Playfair Display", Georgia, "Times New Roman", serif;
+  --accent: #e2661a; --accent-soft: #fbe0cc; --on-accent: #1d1006; --accent-ink: #b24d0e; --series-ours: #e2661a;
+  --green: #4c9636; --green-soft: #dcefd3; --green-ink: #3b7a2a;
+  --lb-w: #2f6db5; --lb-w-ink: #285f9e; --lb-frame: #a8662c; --lb-frame-ink: #8a5220;
+}
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) { --accent: #e06d1c; --accent-soft: #48291a; --on-accent: #160b03; --accent-ink: #f08a43; --series-ours: #e06d1c; }
+  :root:not([data-theme="light"]) {
+    --accent: #ec7a2e; --accent-soft: #48291a; --on-accent: #160b03; --accent-ink: #f39a5c; --series-ours: #ec7a2e;
+    --green: #6cbf55; --green-soft: #1f3a19; --green-ink: #8fd47b;
+    --lb-w: #5f9ae0; --lb-w-ink: #8db8ee; --lb-frame: #c98a4f; --lb-frame-ink: #dfaa77;
+  }
 }
-:root[data-theme="dark"] { --accent: #e06d1c; --accent-soft: #48291a; --on-accent: #160b03; --accent-ink: #f08a43; --series-ours: #e06d1c; }
+:root[data-theme="dark"] {
+  --accent: #ec7a2e; --accent-soft: #48291a; --on-accent: #160b03; --accent-ink: #f39a5c; --series-ours: #ec7a2e;
+  --green: #6cbf55; --green-soft: #1f3a19; --green-ink: #8fd47b;
+  --lb-w: #5f9ae0; --lb-w-ink: #8db8ee; --lb-frame: #c98a4f; --lb-frame-ink: #dfaa77;
+}
 
-/* ---- title art: the kit's wordmark; its hyphen is a turning barber pole ---- */
+/* ---- title art: Playfair, an italic "Barber", and a barber pole for the hyphen ---- */
+.title-art { font-weight: 800; letter-spacing: -.015em; }
+.title-art i, .nav__here i { font-style: italic; font-weight: 700; }
+.nav__here { font-weight: 700; }
 .dash {
-  display: inline-block; width: .44em; height: .145em; margin: 0 .04em 0 .05em; vertical-align: .29em; border-radius: .02em;
+  display: inline-block; width: .44em; height: .15em; margin: 0 .05em; vertical-align: .27em; border-radius: .03em;
   background-image: repeating-linear-gradient(-45deg, var(--accent) 0 .07em, var(--bg) .07em .1em, var(--blue) .1em .17em, var(--bg) .17em .2em);
-  background-size: .2828em 100%; animation: pole 2.4s linear infinite;
+  background-size: .2828em 100%; animation: pole-dash 2.4s linear infinite;
 }
-.pole-fill { background-image: repeating-linear-gradient(-45deg, var(--accent) 0 6px, var(--blue) 6px 12px); background-size: 16.97px 100%; animation: pole 1s linear infinite; }
-@keyframes pole { to { background-position: 16.97px 0; } }
-.dash { animation-name: pole-dash; }
 @keyframes pole-dash { to { background-position: .2828em 0; } }
-@media (prefers-reduced-motion: reduce) { .dash, .pole-fill, .demo-step.is-active .demo-step__bar i { animation: none !important; } }
+@keyframes pole { to { background-position: 16.97px 0; } }
+@media (prefers-reduced-motion: reduce) { .dash, .demo-step.is-active .demo-step__bar i { animation: none !important; } }
 
-/* ---- legend swatches used across the figures ---- */
+/* ---- colors shared by the figures and the equations ---- */
 .sw.kept { background: var(--blue); }
 .sw.pruned { background: var(--line); box-shadow: inset 0 0 0 1px var(--muted); }
 .sw.grown { background: var(--accent); }
 .sw.trimmed { background: var(--line); box-shadow: inset 0 0 0 2px var(--accent); }
 .sw.score { background: linear-gradient(90deg, var(--accent-soft), var(--accent)); }
+.eq .c-w { color: var(--lb-w-ink); } .eq .c-s { color: var(--accent-ink); } .eq .c-e { color: var(--lb-frame-ink); }
+.kicker { color: var(--accent-ink); }
 
-/* ---- first-screen demo ---- */
+/* ---- the toy block at the top of the method ---- */
 .demo-step.is-active .demo-step__bar i { background-image: repeating-linear-gradient(-45deg, var(--accent) 0 6px, var(--blue) 6px 12px); background-size: 16.97px 100%; animation: pole 1s linear infinite; }
 .demo-stage canvas { display: block; width: 100%; }
 .readout { display: flex; flex-wrap: wrap; gap: 4px 20px; font-size: .86rem; color: var(--text); }
@@ -382,13 +462,22 @@ pre.code .k { color: var(--blue); font-weight: 600; }
 .demo-alpha { flex: 1 1 260px; min-width: min(260px, 100%); max-width: 520px; }
 .demo-alpha .ctl-label { display: flex; justify-content: space-between; gap: 12px; }
 .demo-alpha output { font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
-.demo-more { margin-top: 10px; }
-.demo-more summary { font-size: .9rem; }
+.demo-more { margin-top: 12px; }
 .demo-more .ctl-row { margin-top: 4px; }
 .demo-charts { margin-top: 16px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 @media (max-width: 760px) { .demo-charts { grid-template-columns: minmax(0, 1fr); } }
 
-/* ---- method: equations and the forward / backward figure ---- */
+/* ---- the worksheet: a numbered statement over its figure ---- */
+.band + .band, .wide + .band, .band + .wide, .band + .story { margin-top: var(--row-gap); }
+.band__head { align-items: start; }
+.band__n { font-family: var(--display); font-style: italic; font-weight: 700; font-size: 2.75rem; line-height: .82; color: var(--accent); font-variant-numeric: lining-nums; }
+.band__b { display: grid; gap: 14px; min-width: 0; }
+.band__b > p:not(.note) { font-size: var(--fs-body); line-height: 1.7; text-wrap: pretty; }
+.band__b .eq { margin-block: 2px; }
+.band__b .eq math { font-size: 1.2rem; }
+@media (max-width: 560px) { .band__b .eq math { font-size: 1.08rem; } .band__n { font-size: 2.3rem; } }
+
+/* the forward / backward figure: dashed brown frames like the paper's blocks */
 .bf-top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 12px 20px; margin-bottom: 12px; }
 .bf-svg svg { display: block; width: 100%; height: auto; }
 .bf-foot { margin-top: 10px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 20px; }
@@ -396,15 +485,97 @@ pre.code .k { color: var(--blue); font-weight: 600; }
 svg .t-ui { font-family: var(--font); }
 svg .t-math { font-family: var(--font-math); font-style: italic; font-weight: 500; }
 
+/* numeric tiles */
+.sheet .panel { padding: clamp(18px, 3vw, 30px); }
+.ws-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 18px 20px; }
+.ws-mat { display: grid; gap: 10px; justify-items: center; min-width: 0; }
+.ws-h { font-size: .86rem; font-weight: 600; color: var(--ink); white-space: nowrap; }
+.ws-h.k-w { color: var(--lb-w-ink); } .ws-h.k-g { color: var(--green-ink); } .ws-h.k-s { color: var(--accent-ink); }
+.ws-grid { --tile: 46px; display: grid; grid-template-columns: repeat(4, var(--tile)); gap: 4px; }
+.ws-t {
+  width: var(--tile); height: var(--tile); border-radius: 8px; display: grid; place-items: center; position: relative;
+  font: 600 .92rem/1 var(--font); font-variant-numeric: tabular-nums; color: var(--ink);
+  background: color-mix(in srgb, var(--c, var(--line)) var(--p, 0%), var(--bg-card));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c, var(--line-strong)) 28%, var(--line));
+  transition: box-shadow .18s, background-color .35s, color .35s;
+}
+.ws-w { --c: var(--lb-w); } .ws-g { --c: var(--green); } .ws-s { --c: var(--accent); }
+.ws-t.hi { color: #fff; }
+.ws-t.on { box-shadow: 0 0 0 2px var(--ink); z-index: 1; }
+.ws-op { font: 400 1.9rem/1 var(--font-math); color: var(--muted); padding-top: 22px; }
+.ws-m.one { background: var(--bg-card); color: var(--ink); box-shadow: inset 0 0 0 1px var(--line-strong); }
+.ws-m.zero { background: var(--line); color: var(--muted); box-shadow: none; }
+.ws-m.grown { background: var(--accent); color: #fff; box-shadow: none; }
+.ws-m.trimmed { background: var(--line); color: var(--muted); box-shadow: inset 0 0 0 2px var(--accent); }
+.ws-m.on { box-shadow: 0 0 0 2px var(--ink); }
+.ws-m.trimmed.on { box-shadow: inset 0 0 0 2px var(--accent), 0 0 0 2px var(--ink); }
+.ws-read { font-size: .9rem; line-height: 1.6; color: var(--text); text-wrap: pretty; }
+.ws-read b { font-variant-numeric: tabular-nums; }
+#ws-score .ws-read { margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--line); text-align: center; }
+/* the tiles fill in once, W and the gradient first, then the score */
+.sheet:not(.is-in) .ws-t { opacity: 0; }
+.sheet.is-in .ws-t { animation: ws-in .42s var(--ease) both; animation-delay: var(--d, 0ms); }
+@keyframes ws-in { from { opacity: 0; transform: translateY(6px); } }
+
+/* pairs: the weight to grow on top, the gain, the weight to prune below; a swapped pair gets the brown frame */
+.ws-swap { display: grid; grid-template-columns: auto auto auto auto auto; align-items: center; justify-content: center; gap: 16px 18px; }
+.ws-arrow { position: relative; width: 26px; height: 2px; margin-top: 22px; background: var(--line-strong); }
+.ws-arrow::after { content: ""; position: absolute; right: -1px; top: -4px; border: 5px solid transparent; border-left: 7px solid var(--line-strong); border-right: 0; }
+.ws-q { display: grid; gap: 8px; justify-items: center; min-width: 0; }
+.ws-qh { font-size: .8rem; line-height: 1.3; color: var(--muted); white-space: nowrap; }
+.ws-qh b { color: var(--ink); font-weight: 700; }
+.ws-pairs { --qt: 40px; display: grid; grid-template-columns: repeat(8, auto); gap: 2px; }
+.ws-pair { display: grid; grid-template-rows: var(--qt) 22px var(--qt); justify-items: center; align-items: center; gap: 2px; padding: 3px; border-radius: 11px; cursor: default; transition: box-shadow .25s, background-color .25s; }
+.ws-pair .ws-t { --tile: var(--qt); font-size: .8rem; }
+.ws-gain { font: 700 .72rem/1 var(--font); font-variant-numeric: tabular-nums; color: var(--muted); }
+.ws-pair.pos .ws-gain { color: var(--accent-ink); }
+.ws-pair.is-sw { box-shadow: inset 0 0 0 2px var(--lb-frame); background: color-mix(in srgb, var(--lb-frame) 7%, transparent); }
+.ws-pair.on { box-shadow: inset 0 0 0 2px var(--ink); }
+.ws-ctl { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 24px; }
+.ws-ctl .ws-read { flex: 1 1 300px; min-width: 0; padding-bottom: 5px; }
+@media (max-width: 1100px) { .ws-grid { --tile: 40px; } .ws-pairs { --qt: 36px; } }
+@media (max-width: 900px) {
+  .ws-swap { grid-template-columns: auto auto; grid-template-areas: "mi mr" "q q"; gap: 20px 28px; }
+  .ws-mi { grid-area: mi; } .ws-mr { grid-area: mr; } .ws-q { grid-area: q; }
+  .ws-arrow { display: none; }
+}
+@media (max-width: 560px) {
+  .ws-grid { --tile: 31px; gap: 3px; }
+  .ws-t { font-size: .78rem; border-radius: 6px; }
+  .ws-row { gap: 14px 10px; }
+  .ws-op { font-size: 1.5rem; }
+  .ws-pairs { --qt: 30px; }
+  .ws-pair { padding: 2px; border-radius: 9px; }
+  .ws-pair .ws-t { font-size: .7rem; }
+  .ws-qh { white-space: normal; text-align: center; }
+}
+@media (prefers-reduced-motion: reduce) { .sheet .ws-t { animation: none !important; opacity: 1 !important; } }
+@media print { .sheet .ws-t { animation: none !important; opacity: 1 !important; } }
+
+/* ---- results ---- */
+#dumb .ctl-row { margin-bottom: 14px; }
+#dumb .legend { margin-top: 10px; }
+.chart-plot svg { display: block; width: 100%; height: auto; overflow: visible; }
+svg .ds-bar-start { fill: var(--series-base); opacity: .55; }
+svg .ds-bar-ds { fill: var(--muted); opacity: .55; }
+svg .ds-bar-lb { fill: var(--series-ours); }
+svg .ds-dense { stroke: var(--ink); stroke-width: 1.5; stroke-dasharray: 3 3; }
+svg .zs-track { stroke: var(--line-strong); stroke-width: 2; }
+svg .zs-gain { stroke: var(--series-ours); stroke-width: 3; stroke-linecap: round; }
+svg .zs-start { fill: var(--series-base); stroke: var(--bg-card); stroke-width: 2; }
+svg .zs-lb { fill: var(--series-ours); stroke: var(--bg-card); stroke-width: 2; }
+svg .zs-dense { stroke: var(--ink); stroke-width: 2; stroke-linecap: round; }
+.code-note { margin-top: 12px; }
+svg tspan.mut { fill: var(--muted); font-weight: 500; }
+
 </style>
 <script>try{var t=localStorage.getItem('theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
 </head>
 <body>
 <header class="nav" id="nav">
   <div class="wrap nav__wrap">
-    <p class="nav__brand"><a class="nav__home" href="https://yupengsu.github.io/">Yupeng Su</a><span class="nav__sep" aria-hidden="true">/</span><a class="nav__here" href="#top">LLM-Barber</a></p>
+    <p class="nav__brand"><a class="nav__home" href="https://yupengsu.github.io/">Yupeng Su</a><span class="nav__sep" aria-hidden="true">/</span><a class="nav__here" href="#top" aria-label="LLM-Barber">LLM<span class="dash" aria-hidden="true"></span><span class="sr-only">-</span><i>Barber</i></a></p>
     <nav class="nav__links" id="navLinks" aria-label="Sections">
-      <a href="#how">Demo</a>
       <a href="#method">Method</a>
       <a href="#results">Results</a>
       <a href="#code">Code</a>
@@ -416,7 +587,7 @@ svg .t-math { font-family: var(--font-math); font-style: italic; font-weight: 50
 </header>
 <header class="hero wrap" id="top">
   <p class="hero__venue"><span class="shield"><span class="shield__k">ICCAD</span><span class="shield__v">2025</span></span><span>IEEE/ACM International Conference on <span class="nw">Computer-Aided</span> Design, Munich</span></p>
-  <h1 class="title-art">LLM<span class="dash" aria-hidden="true"></span><span class="sr-only">-</span>Barber</h1>
+  <h1 class="title-art">LLM<span class="dash" aria-hidden="true"></span><span class="sr-only">-</span><i>Barber</i></h1>
   <p class="hero__subtitle"><span class="nw">Block-Aware</span> Rebuilder for Sparsity Mask in <span class="nw">One-Shot</span> for Large Language Models</p>
   <p class="hero__tagline">One pass rebuilds the mask of a pruned LLM. No retraining, no weight updates, same sparsity.</p>
   <ul class="hero__authors" aria-label="Authors">
@@ -444,88 +615,93 @@ svg .t-math { font-family: var(--font-math); font-style: italic; font-weight: 50
   </div>
 </header>
 <main>
-<section class="demo-sec" id="how" aria-labelledby="how-h">
-  <div class="wrap">
-    <h2 class="sr-only" id="how-h">How LLM-Barber works</h2>
-    <figure class="bench demo" id="demo">
-      <div class="demo-head">
-        <ol class="demo-steps" id="demo-steps" aria-label="Steps of LLM-Barber"></ol>
-        <div class="demo-ctl">
-          <button class="btn btn--sm" type="button" id="demo-play" aria-pressed="false">Pause</button>
-          <button class="btn btn--sm" type="button" id="demo-replay">Replay</button>
-        </div>
-      </div>
-      <p class="demo-text" id="demo-text"></p>
-      <div class="demo-stage"><canvas id="demo-canvas" role="img" aria-label="The three weight matrices of a SwiGLU MLP block. A magnitude mask prunes half the weights; LLM-Barber backpropagates the block-output error, scores every weight by weight times gradient, and swaps the best pruned weights back in for the worst kept ones."></canvas></div>
-      <div class="demo-foot">
-        <div class="readout" id="demo-read"></div>
-        <ul class="legend" aria-label="Legend">
-          <li><span class="sw kept"></span>Kept</li>
-          <li><span class="sw pruned"></span>Pruned</li>
-          <li><span class="sw score"></span>Score</li>
-          <li><span class="sw grown"></span>Grown back</li>
-          <li><span class="sw trimmed"></span>Trimmed</li>
-        </ul>
-      </div>
-      <div class="demo-tune ctl-row">
-        <div class="ctl"><span class="ctl-label" id="dm-init-l">Starting mask</span>
-          <div class="seg" role="group" aria-labelledby="dm-init-l" data-key="init">
-            <button type="button" data-v="magnitude" aria-pressed="true">Magnitude</button>
-            <button type="button" data-v="wanda" aria-pressed="false">Wanda</button>
-          </div></div>
-        <div class="ctl demo-alpha">
-          <label class="ctl-label" for="demo-alpha"><span>Swap ratio <span class="m">α</span></span><output id="demo-alpha-o" for="demo-alpha">50%</output></label>
-          <input type="range" id="demo-alpha" min="0" max="100" step="1" value="50">
-        </div>
-      </div>
-      <details class="more demo-more" id="demo-more">
-        <summary>More options</summary>
-        <div class="ctl-row">
-          <div class="ctl"><span class="ctl-label" id="dm-sp-l">Sparsity</span>
-            <div class="seg" role="group" aria-labelledby="dm-sp-l" data-key="sparsity">
-              <button type="button" data-v="0.5" aria-pressed="true">50%</button>
-              <button type="button" data-v="0.6" aria-pressed="false">60%</button>
-              <button type="button" data-v="0.7" aria-pressed="false">70%</button>
-            </div></div>
-          <div class="ctl"><span class="ctl-label" id="dm-gr-l">Pairs formed per</span>
-            <div class="seg" role="group" aria-labelledby="dm-gr-l" data-key="gran">
-              <button type="button" data-v="output" aria-pressed="false">Row</button>
-              <button type="button" data-v="input" aria-pressed="false">Column</button>
-              <button type="button" data-v="layer" aria-pressed="false">Matrix</button>
-              <button type="button" data-v="block" aria-pressed="true">Block</button>
-            </div></div>
-          <div class="ctl"><span class="ctl-label" id="dm-me-l">Score</span>
-            <div class="seg" role="group" aria-labelledby="dm-me-l" data-key="metric">
-              <button type="button" data-v="WD" aria-pressed="true"><span class="m"><span class="u">|</span>W<span class="u">|·|</span>∂E/∂W<span class="u">|</span></span></button>
-              <button type="button" data-v="W" aria-pressed="false"><span class="m"><span class="u">|</span>W<span class="u">|</span></span></button>
-              <button type="button" data-v="D" aria-pressed="false"><span class="m"><span class="u">|</span>∂E/∂W<span class="u">|</span></span></button>
-            </div></div>
-          <button class="btn btn--sm" type="button" id="demo-seed">New random block</button>
-        </div>
-        <div class="demo-charts">
-          <div class="card chart-card" id="demo-err"><h4>Block error vs. <span class="m">α</span></h4><p class="sub-l">Too many swaps hurt again</p></div>
-          <div class="card chart-card" id="demo-gain"><h4>Gain of each candidate pair</h4><p class="sub-l">A few pairs carry most of the gain</p></div>
-        </div>
-      </details>
-    </figure>
-    <p class="fig-cap">A toy SwiGLU MLP block, computed live in your browser with the rules of the released code.</p>
-  </div>
-</section>
-
 <section class="section" id="method" aria-labelledby="method-h">
   <div class="wrap">
-    <div class="section__head prose">
+    <div class="sec-head">
       <h2 class="section__title" id="method-h">Method</h2>
-      <p>Every Self-Attention block (Q, K, V, O) and MLP block (gate, up, down) of the pruned model is rebuilt in three steps.</p>
+      <p class="lede">LLM-Barber starts from any pruned model and rebuilds the mask of every Self-Attention and MLP block in one pass. The weights keep their values and the sparsity stays the same.</p>
     </div>
-    <ol class="steps">
-      <li class="step">
-        <h3 class="sub__title step__head"><span class="step__n" aria-hidden="true">1</span>Measure the error at the block</h3>
-        <div class="prose"><p>Layer-wise pruners fit each projection to its own output, <span class="m"><span class="u">‖</span>WX <span class="u">− (</span>W <span class="u">⊙</span> M<span class="u">)</span>X<span class="u">‖²</span></span>, and the small biases accumulate from layer to layer. <span class="nw">LLM-Barber</span> takes one error at the output of the whole block, so the masks of all its projections are judged together:</p></div>
-        <div class="eq" role="group" aria-label="Block-aware reconstruction error">
-          <math display="block"><mrow><mi>E</mi><mo>=</mo><msubsup><mrow><mo class="f">‖</mo><mi>Block</mi><mo>(</mo><mi>W</mi><mo>,</mo><mi>X</mi><mo>)</mo><mo>−</mo><mi>Block</mi><mo>(</mo><mi>W</mi><mo>⊙</mo><mi>M</mi><mo>,</mo><mi>X</mi><mo>)</mo><mo class="f">‖</mo></mrow><mn>2</mn><mn>2</mn></msubsup></mrow></math>
+
+    <figure class="wide" id="overview">
+      <div class="panel demo" id="demo">
+        <div class="demo-head">
+          <ol class="demo-steps" id="demo-steps" aria-label="Steps of LLM-Barber"></ol>
+          <div class="demo-ctl">
+            <button class="btn btn--sm" type="button" id="demo-play" aria-pressed="false">Pause</button>
+            <button class="btn btn--sm" type="button" id="demo-replay">Replay</button>
+          </div>
         </div>
-        <figure class="bench" id="bf">
+        <p class="demo-text" id="demo-text"></p>
+        <div class="demo-stage"><canvas id="demo-canvas" role="img" aria-label="The three weight matrices of a SwiGLU MLP block. A magnitude mask prunes half the weights; LLM-Barber backpropagates the block-output error, scores every weight by weight times gradient, and swaps the best pruned weights back in for the worst kept ones."></canvas></div>
+        <div class="demo-foot">
+          <div class="readout" id="demo-read"></div>
+          <ul class="legend" aria-label="Legend">
+            <li><span class="sw kept"></span>Kept</li>
+            <li><span class="sw pruned"></span>Pruned</li>
+            <li><span class="sw score"></span>Score</li>
+            <li><span class="sw grown"></span>Grown back</li>
+            <li><span class="sw trimmed"></span>Trimmed</li>
+          </ul>
+        </div>
+        <div class="demo-tune ctl-row">
+          <div class="ctl"><span class="ctl-label" id="dm-init-l">Starting mask</span>
+            <div class="seg" role="group" aria-labelledby="dm-init-l" data-key="init">
+              <button type="button" data-v="magnitude" aria-pressed="true">Magnitude</button>
+              <button type="button" data-v="wanda" aria-pressed="false">Wanda</button>
+            </div></div>
+          <div class="ctl demo-alpha">
+            <label class="ctl-label" for="demo-alpha"><span>Swap ratio <span class="m">α</span></span><output id="demo-alpha-o" for="demo-alpha">50%</output></label>
+            <input type="range" id="demo-alpha" min="0" max="100" step="1" value="50">
+          </div>
+        </div>
+        <details class="more demo-more" id="demo-more">
+          <summary>More options</summary>
+          <div class="ctl-row">
+            <div class="ctl"><span class="ctl-label" id="dm-sp-l">Sparsity</span>
+              <div class="seg" role="group" aria-labelledby="dm-sp-l" data-key="sparsity">
+                <button type="button" data-v="0.5" aria-pressed="true">50%</button>
+                <button type="button" data-v="0.6" aria-pressed="false">60%</button>
+                <button type="button" data-v="0.7" aria-pressed="false">70%</button>
+              </div></div>
+            <div class="ctl"><span class="ctl-label" id="dm-gr-l">Pairs formed per</span>
+              <div class="seg" role="group" aria-labelledby="dm-gr-l" data-key="gran">
+                <button type="button" data-v="output" aria-pressed="false">Row</button>
+                <button type="button" data-v="input" aria-pressed="false">Column</button>
+                <button type="button" data-v="layer" aria-pressed="false">Matrix</button>
+                <button type="button" data-v="block" aria-pressed="true">Block</button>
+              </div></div>
+            <div class="ctl"><span class="ctl-label" id="dm-me-l">Score</span>
+              <div class="seg" role="group" aria-labelledby="dm-me-l" data-key="metric">
+                <button type="button" data-v="WD" aria-pressed="true"><span class="m"><span class="u">|</span>W<span class="u">|·|</span>∂E/∂W<span class="u">|</span></span></button>
+                <button type="button" data-v="W" aria-pressed="false"><span class="m"><span class="u">|</span>W<span class="u">|</span></span></button>
+                <button type="button" data-v="D" aria-pressed="false"><span class="m"><span class="u">|</span>∂E/∂W<span class="u">|</span></span></button>
+              </div></div>
+            <button class="btn btn--sm" type="button" id="demo-seed">New random block</button>
+          </div>
+          <div class="demo-charts">
+            <div class="card chart-card" id="demo-err"><h4>Block error against <span class="m">α</span></h4><p class="sub-l">Too many swaps hurt again</p></div>
+            <div class="card chart-card" id="demo-gain"><h4>Gain of each candidate pair</h4><p class="sub-l">A few pairs carry most of the gain</p></div>
+          </div>
+        </details>
+      </div>
+      <figcaption class="fig-cap">A toy SwiGLU MLP block, computed live in your browser with the rules of the released code. The three steps below take it apart.</figcaption>
+    </figure>
+
+    <div class="band" id="m-block">
+      <div class="split band__head">
+        <div class="split__a">
+          <span class="band__n" aria-hidden="true">1</span>
+          <h3 class="story__title">Measure the error at the block</h3>
+        </div>
+        <div class="band__b">
+          <p>Layer-wise pruners fit each projection to its own output, <span class="m"><span class="u">‖</span>WX <span class="u">− (</span>W <span class="u">⊙</span> M<span class="u">)</span>X<span class="u">‖²</span></span>, and the small biases add up from layer to layer. LLM-Barber takes one error at the output of the whole block, so the masks of all its projections are judged together:</p>
+          <div class="eq" role="group" aria-label="Block-aware reconstruction error">
+            <math display="block"><mrow><mi class="c-e">E</mi><mo>=</mo><msubsup><mrow><mo class="f">‖</mo><mi>Block</mi><mo>(</mo><mi>W</mi><mo>,</mo><mi>X</mi><mo>)</mo><mo>−</mo><mi>Block</mi><mo>(</mo><mi>W</mi><mo>⊙</mo><mi>M</mi><mo>,</mo><mi>X</mi><mo>)</mo><mo class="f">‖</mo></mrow><mn>2</mn><mn>2</mn></msubsup></mrow></math>
+          </div>
+        </div>
+      </div>
+      <figure class="band__fig">
+        <div class="panel" id="bf">
           <div class="bf-top">
             <div class="ctl">
               <span class="ctl-label" id="bf-mode-l">Error measured per</span>
@@ -541,65 +717,161 @@ svg .t-math { font-family: var(--font-math); font-style: italic; font-weight: 50
             <ul class="legend" id="bf-legend" aria-label="Legend"></ul>
             <p class="bf-eq" id="bf-eq"></p>
           </div>
-        </figure>
-        <p class="fig-cap">The forward pass reaches each block's output, and the gradient of <span class="m">E</span> flows back to all of its projections, whose masks are then rebuilt. Each rebuilt block feeds the next, so the model needs one forward pass and one local backward pass per block.</p>
-      </li>
-      <li class="step">
-        <h3 class="sub__title step__head"><span class="step__n" aria-hidden="true">2</span>Score every weight with its gradient</h3>
-        <div class="prose"><p>At the dense model <span class="m">E</span> is zero and its gradient vanishes, which is why methods such as SparseGPT turn to the Hessian. After pruning <span class="m">E</span> is no longer zero, so the first-order term is enough. Pruning or regrowing a weight changes it by <span class="m"><span class="u">|Δ</span>W<sub>ij</sub><span class="u">| = |</span>W<sub>ij</sub><span class="u">|</span></span>, which gives the score:</p></div>
-        <div class="eq eq-row" role="group" aria-label="First-order change of the error and the resulting score">
-          <math display="block"><mrow><mi mathvariant="normal">Δ</mi><mi>E</mi><mo>≈</mo><mfrac><mrow><mo>∂</mo><mi>E</mi></mrow><mrow><mo>∂</mo><mi>W</mi></mrow></mfrac><mo>·</mo><mi mathvariant="normal">Δ</mi><mi>W</mi></mrow></math>
-          <math display="block"><mrow><mo>⇒</mo><mspace width="0.5em"></mspace><msub><mi>S</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><mrow><mo class="f">|</mo><msub><mi>W</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo class="f">|</mo></mrow><mo>·</mo><mrow><mo class="f">|</mo><mfrac><mrow><mo>∂</mo><mi>E</mi></mrow><mrow><mo>∂</mo><msub><mi>W</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mrow></mfrac><mo class="f">|</mo></mrow></mrow></math>
         </div>
-      </li>
-      <li class="step">
-        <h3 class="sub__title step__head"><span class="step__n" aria-hidden="true">3</span>Swap weights in pairs</h3>
-        <div class="prose"><p>Within each group of weights (an output row, an input column, a matrix or a whole block), pruned weights are sorted by <span class="m">S</span> from high to low and kept weights from low to high, then paired in order. Each swap regrows one weight and prunes another, so sparsity never changes. Only a fraction <span class="m">α</span> of the pairs with a positive gain is swapped:</p></div>
-        <div class="eq" role="group" aria-label="Number of swapped pairs">
-          <math display="block"><mrow><mi>N</mi><mo>=</mo><mi>α</mi><mo>·</mo><mrow><mo class="f">|</mo><mo class="f">{</mo><mi>i</mi><mo>:</mo><msubsup><mi>S</mi><mi>i</mi><mtext>grow</mtext></msubsup><mo>−</mo><msubsup><mi>S</mi><mi>i</mi><mtext>prune</mtext></msubsup><mo>&gt;</mo><mn>0</mn><mo class="f">}</mo><mo class="f">|</mo></mrow></mrow></math>
+        <figcaption class="fig-cap">The forward pass reaches each block's output, and the gradient of <span class="m">E</span> flows back to all of its projections, whose masks are then rebuilt. Each rebuilt block feeds the next: one forward pass for the model and one local backward pass per block.</figcaption>
+      </figure>
+    </div>
+
+    <div class="band" id="m-score">
+      <div class="split band__head">
+        <div class="split__a">
+          <span class="band__n" aria-hidden="true">2</span>
+          <h3 class="story__title">Score every weight with its gradient</h3>
         </div>
-        <p class="note">The best <span class="m">α</span> sits where the outlier pairs end: about 10% after Magnitude and 1% after Wanda on LLaMA-7B.</p>
-      </li>
-    </ol>
+        <div class="band__b">
+          <p>At the dense model <span class="m">E</span> is zero and its gradient vanishes, which is why methods such as SparseGPT turn to the Hessian. After pruning <span class="m">E</span> is no longer zero, so the first-order term is enough. Pruning or regrowing a weight changes it by <span class="m"><span class="u">|Δ</span>W<sub>ij</sub><span class="u">| = |</span>W<sub>ij</sub><span class="u">|</span></span>, which gives the score:</p>
+          <div class="eq eq-row" role="group" aria-label="First-order change of the error and the resulting score">
+            <math display="block"><mrow><mi mathvariant="normal">Δ</mi><mi class="c-e">E</mi><mo>≈</mo><mfrac><mrow><mo>∂</mo><mi class="c-e">E</mi></mrow><mrow><mo>∂</mo><mi>W</mi></mrow></mfrac><mo>·</mo><mi mathvariant="normal">Δ</mi><mi>W</mi></mrow></math>
+            <math display="block"><mrow><mo>⇒</mo><mspace width="0.5em"></mspace><msub><mi class="c-s">S</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><mrow><mo class="f">|</mo><msub><mi class="c-w">W</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo class="f">|</mo></mrow><mo>·</mo><mrow><mo class="f">|</mo><mfrac><mrow><mo>∂</mo><mi class="c-e">E</mi></mrow><mrow><mo>∂</mo><msub><mi>W</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mrow></mfrac><mo class="f">|</mo></mrow></mrow></math>
+          </div>
+        </div>
+      </div>
+      <figure class="band__fig sheet" id="ws-score">
+        <div class="panel">
+          <div class="ws-row">
+            <div class="ws-mat"><p class="ws-h k-w">Weight <span class="m">W</span></p><div class="ws-grid" data-m="W"></div></div>
+            <span class="ws-op" aria-hidden="true">⊙</span>
+            <div class="ws-mat"><p class="ws-h k-g">Gradient <span class="m"><span class="u">|</span>∂E/∂W<span class="u">|</span></span></p><div class="ws-grid" data-m="G"></div></div>
+            <span class="ws-op" aria-hidden="true">=</span>
+            <div class="ws-mat"><p class="ws-h k-s">Score <span class="m">S</span></p><div class="ws-grid" data-m="S"></div></div>
+          </div>
+          <p class="ws-read" aria-live="polite"><span class="m">W<sub>11</sub></span> = 1 is one of the smallest weights, but its gradient is the largest, so it scores highest. <span class="m">W<sub>22</sub></span> = 11, one of the two largest weights, scores 1.1. Point at a cell to read it.</p>
+        </div>
+        <figcaption class="fig-cap">The worked example of Figure 2b in the paper.</figcaption>
+      </figure>
+    </div>
+
+    <div class="band" id="m-swap">
+      <div class="split band__head">
+        <div class="split__a">
+          <span class="band__n" aria-hidden="true">3</span>
+          <h3 class="story__title">Swap weights in pairs</h3>
+        </div>
+        <div class="band__b">
+          <p>Pruned weights are sorted by <span class="m">S</span> from high to low and kept weights from low to high, then paired in order. Each swap regrows one weight and prunes another, so the sparsity never changes. Only a fraction <span class="m">α</span> of the pairs with a positive gain is swapped:</p>
+          <div class="eq" role="group" aria-label="Number of swapped pairs">
+            <math display="block"><mrow><mi>N</mi><mo>=</mo><mi>α</mi><mo>·</mo><mrow><mo class="f">|</mo><mo class="f">{</mo><mi>i</mi><mo>:</mo><msubsup><mi class="c-s">S</mi><mi>i</mi><mtext>grow</mtext></msubsup><mo>−</mo><msubsup><mi class="c-s">S</mi><mi>i</mi><mtext>prune</mtext></msubsup><mo>&gt;</mo><mn>0</mn><mo class="f">}</mo><mo class="f">|</mo></mrow></mrow></math>
+          </div>
+          <p class="note">Pairs are formed within a group: an output row, an input column, a matrix or the whole block. The best <span class="m">α</span> sits where the outlier pairs end, about 10% after Magnitude and 1% after Wanda on LLaMA-7B.</p>
+        </div>
+      </div>
+      <figure class="band__fig sheet" id="ws-swap">
+        <div class="panel">
+          <div class="ws-swap">
+            <div class="ws-mat ws-mi"><p class="ws-h">Starting mask <span class="m">M<sub>i</sub></span></p><div class="ws-grid" data-m="M0"></div></div>
+            <span class="ws-arrow" aria-hidden="true"></span>
+            <div class="ws-q">
+              <p class="ws-qh"><b>Grow</b> pruned weights, highest score first</p>
+              <div class="ws-pairs" aria-label="Pairs: the score of the weight to grow, the gain, and the score of the weight to prune"></div>
+              <p class="ws-qh"><b>Prune</b> kept weights, lowest score first</p>
+            </div>
+            <span class="ws-arrow" aria-hidden="true"></span>
+            <div class="ws-mat ws-mr"><p class="ws-h">Rebuilt mask <span class="m">M<sub>r</sub></span></p><div class="ws-grid" data-m="M1"></div></div>
+          </div>
+          <div class="ws-ctl">
+            <div class="ctl"><span class="ctl-label" id="ws-a-l">Swap ratio <span class="m">α</span></span>
+              <div class="seg" role="group" aria-labelledby="ws-a-l" id="ws-alpha">
+                <button type="button" data-v="0" aria-pressed="false">0</button>
+                <button type="button" data-v="0.25" aria-pressed="false">25%</button>
+                <button type="button" data-v="0.5" aria-pressed="true">50%</button>
+                <button type="button" data-v="0.75" aria-pressed="false">75%</button>
+                <button type="button" data-v="1" aria-pressed="false">100%</button>
+              </div></div>
+            <p class="ws-read" aria-live="polite"></p>
+          </div>
+        </div>
+        <figcaption class="fig-cap">The same example. Each column is one pair: the weight to grow on top, the weight to prune below, the gain between them. At <span class="m">α</span> = 50% the two largest gains are swapped, as in the paper.</figcaption>
+      </figure>
+    </div>
   </div>
 </section>
 
 <section class="section" id="results" aria-labelledby="res-h">
   <div class="wrap">
-    <div class="section__head"><h2 class="section__title" id="res-h">Results</h2></div>
-    <ul class="kv" aria-label="Key numbers">
-      <li><span class="k">205.5 <svg viewBox="0 0 16 11" aria-hidden="true"><path d="M1 5.5h12M9 1.5l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> 10.98</span><span class="v">WikiText-2 perplexity of LLaMA3-8B at 50% sparsity, from a magnitude mask</span></li>
-      <li><span class="k">7 of 7 models</span><span class="v">improve from every starting mask: Magnitude, SparseGPT and Wanda</span></li>
-      <li><span class="k">≈ 30 min</span><span class="v">per 7B–13B model on one A100, with no retraining and no weight updates</span></li>
-    </ul>
+    <div class="sec-head">
+      <h2 class="section__title" id="res-h">Results</h2>
+      <p class="lede">LLaMA and OPT models from 6.7B to 13B parameters, pruned to 50% by Magnitude, SparseGPT or Wanda and then rebuilt, with 128 segments of 2048 tokens from C4 for calibration.</p>
+    </div>
 
-    <figure class="bench chart" id="dumb" style="margin-top:22px">
-      <div class="ctl-row" style="margin-bottom:14px">
-        <div class="ctl"><span class="ctl-label" id="db-m-l">Starting mask</span>
-          <div class="seg" role="group" aria-labelledby="db-m-l" data-key="method">
-            <button type="button" data-v="magnitude" aria-pressed="true">Magnitude</button>
-            <button type="button" data-v="sparsegpt" aria-pressed="false">SparseGPT</button>
-            <button type="button" data-v="wanda" aria-pressed="false">Wanda</button>
-          </div></div>
-        <div class="ctl"><span class="ctl-label" id="db-p-l">Sparsity pattern</span>
-          <div class="seg" role="group" aria-labelledby="db-p-l" data-key="pattern">
-            <button type="button" data-v="u" aria-pressed="true">50% unstructured</button>
-            <button type="button" data-v="4:8" aria-pressed="false">4:8</button>
-            <button type="button" data-v="2:4" aria-pressed="false">2:4</button>
-          </div></div>
+    <div class="wide" id="r-ppl">
+      <div class="split">
+        <div class="split__a">
+          <span class="kicker">WikiText-2 perplexity</span>
+          <h3 class="story__title">Every starting mask gets better</h3>
+        </div>
+        <div class="bigs bigs--row">
+          <div class="big"><span class="big__v"><span class="from">205.5</span><span class="arr">→</span><span class="to">10.98</span></span><span class="big__l">LLaMA3-8B, from a magnitude mask</span></div>
+          <div class="big"><span class="big__v">7<small>of 7</small></span><span class="big__l">models improve from every starting mask</span></div>
+          <div class="big"><span class="big__v">≈ 30<small>min</small></span><span class="big__l">for a 7B to 13B model on one A100</span></div>
+        </div>
       </div>
-      <div id="dumb-svg"></div>
-      <ul class="legend" id="dumb-legend" style="margin-top:10px" aria-label="Legend"></ul>
-    </figure>
-    <p class="note" id="dumb-take" style="margin-top:10px"></p>
+      <figure class="panel chart" id="dumb">
+        <div class="ctl-row">
+          <div class="ctl"><span class="ctl-label" id="db-m-l">Starting mask</span>
+            <div class="seg" role="group" aria-labelledby="db-m-l" data-key="method">
+              <button type="button" data-v="magnitude" aria-pressed="true">Magnitude</button>
+              <button type="button" data-v="sparsegpt" aria-pressed="false">SparseGPT</button>
+              <button type="button" data-v="wanda" aria-pressed="false">Wanda</button>
+            </div></div>
+          <div class="ctl"><span class="ctl-label" id="db-p-l">Sparsity pattern</span>
+            <div class="seg" role="group" aria-labelledby="db-p-l" data-key="pattern">
+              <button type="button" data-v="u" aria-pressed="true">50% unstructured</button>
+              <button type="button" data-v="4:8" aria-pressed="false">4:8</button>
+              <button type="button" data-v="2:4" aria-pressed="false">2:4</button>
+            </div></div>
+        </div>
+        <div id="dumb-svg"></div>
+        <ul class="legend" id="dumb-legend" aria-label="Legend"></ul>
+      </figure>
+      <p class="fig-cap" id="dumb-take"></p>
+    </div>
 
-    <details class="more" style="margin-top:18px">
+    <div class="story" id="r-dsnot">
+      <div class="story__text">
+        <span class="kicker">One pass</span>
+        <h3 class="story__title">One pass beats iterative regrowth</h3>
+        <p>DSnoT also rebuilds masks without training, but prunes and regrows weights over many cycles with a fixed iteration limit, layer by layer. LLM-Barber rebuilds each block once and recovers far more from a poor start.</p>
+      </div>
+      <figure class="story__fig">
+        <div class="panel" id="ds-fig"></div>
+        <figcaption class="fig-cap">LLaMA3-8B at 50% unstructured sparsity, WikiText-2 perplexity (Table V of the paper). The dashed line is the dense model.</figcaption>
+      </figure>
+    </div>
+
+    <div class="story story--flip" id="r-zs">
+      <div class="story__text">
+        <span class="kicker">Zero-shot</span>
+        <h3 class="story__title">Accuracy follows the perplexity</h3>
+        <p>Mean accuracy over BoolQ, RTE, HellaSwag, ARC-e, ARC-c and OpenBookQA. From a magnitude mask, LLaMA3-8B goes from 36.57 to 52.58; the dense model has 62.79.</p>
+      </div>
+      <figure class="story__fig">
+        <div class="panel" id="zs-fig"></div>
+        <figcaption class="fig-cap">Mean zero-shot accuracy at 50% unstructured sparsity (Table IV of the paper). The dark tick is the dense model.</figcaption>
+      </figure>
+    </div>
+
+    <details class="more more--after">
       <summary>More results</summary>
       <div class="more-body">
         <div class="res-block">
+          <h3 class="more-h">Choosing <span class="m">α</span> where the outliers end</h3>
+          <p class="more-p">Top: the gain of each candidate pair, largest first. Bottom: WikiText-2 perplexity of LLaMA-7B against <span class="m">α</span>, for four ways of grouping the pairs. The dashed line marks the best <span class="m">α</span>, which follows where the outlier pairs end: 10% after Magnitude, 1% after Wanda.</p>
+          <div class="fig-img"><img class="zoom" src="static/images/fig3.png" alt="Figure 3 of the paper: importance score of the mask rebuilding pairs and WikiText-2 perplexity against the mask rebuilding ratio for Magnitude, SparseGPT and Wanda starting masks on LLaMA-7B." loading="lazy" width="1800" height="696"></div>
+        </div>
+        <div class="res-block">
           <h3 class="more-h">Higher sparsity, LLaMA3-8B</h3>
-          <div class="bench chart"><div class="res-grid" id="hs-grid"></div>
-            <ul class="legend" style="margin-top:10px" aria-label="Legend">
+          <div class="panel chart"><div class="res-grid" id="hs-grid"></div>
+            <ul class="legend" aria-label="Legend">
               <li><span class="sw line" style="background:var(--series-base)"></span>Starting mask</li>
               <li><span class="sw line" style="background:var(--series-ours)"></span>With LLM-Barber</li>
             </ul></div>
@@ -610,7 +882,7 @@ svg .t-math { font-family: var(--font-math); font-style: italic; font-weight: 50
           <p class="note">Bold marks the best pruned result per task.</p>
         </div>
         <div class="res-block">
-          <h3 class="more-h">One pass vs. iterative regrowth (DSnoT), LLaMA3-8B</h3>
+          <h3 class="more-h">One pass against DSnoT, LLaMA3-8B</h3>
           <div class="tbl-wrap" id="dsnot"></div>
         </div>
         <div class="res-grid">
@@ -628,7 +900,10 @@ svg .t-math { font-family: var(--font-math); font-style: italic; font-weight: 50
 
 <section class="section" id="code" aria-labelledby="code-h">
   <div class="wrap">
-    <div class="section__head"><h2 class="section__title" id="code-h">Code</h2></div>
+    <div class="sec-head">
+      <h2 class="section__title" id="code-h">Code</h2>
+      <p class="lede">The repository rebuilds masks from Magnitude, SparseGPT or Wanda on LLaMA and OPT models, and has the scripts for every experiment in the paper.</p>
+    </div>
     <div class="code-grid">
       <div>
         <div class="code-head">Set up</div>
@@ -646,7 +921,7 @@ pip3 install -r requirements.txt</code></pre>
   --save_ppl out/ppl</code></pre>
       </div>
     </div>
-    <p class="note" style="margin-top:12px"><code>--threshold</code> is the swap ratio <span class="m">α</span> (the paper's mask rebuilding ratio). Commands for every experiment are in <a href="https://github.com/YupengSu/LLM-Barber" target="_blank" rel="noopener"><code>script/</code></a>.</p>
+    <p class="note code-note"><code>--threshold</code> is the swap ratio <span class="m">α</span> (the paper's mask rebuilding ratio). Commands for every experiment are in <a href="https://github.com/YupengSu/LLM-Barber" target="_blank" rel="noopener"><code>script/</code></a>.</p>
   </div>
 </section>
 <section class="section" id="cite" aria-labelledby="cite-h">
@@ -1619,7 +1894,7 @@ const BlockFig = (() => {
       const li = (style, cls, text) => { const l = U.el('li', null, legendEl); const sw = U.el('span', 'sw ' + (cls || ''), l); if (style) sw.setAttribute('style', style); l.append(text); };
       li('background:var(--ink)', 'line', 'Forward pass');
       if (mode === 'block') {
-        li('background:var(--accent)', 'line', 'Gradient of the block error');
+        li('background:var(--green)', 'line', 'Gradient of the block error');
         li(null, 'grown', 'Grown back');
         li(null, 'trimmed', 'Trimmed');
       } else li('background:var(--blue)', 'dot', 'Error of one projection');
@@ -1647,8 +1922,8 @@ const BlockFig = (() => {
       for (let i = 0; i < L; i++) st.ticks.push(svg('rect', { x: sl.x0 + i * pitch, y: sl.y, width: Math.max(3, pitch - (orient === 'wide' ? 6 : 3)), height: sl.h, rx: 2, style: 'fill:var(--line)' }, root));
       // boxes
       for (const b of lay.boxes) {
-        svg('rect', { x: b.x, y: b.y, width: b.w, height: b.h, rx: 18, style: 'fill:none;stroke:var(--muted);stroke-width:1.5;stroke-dasharray:7 6;opacity:.7' }, root);
-        const tx = svg('text', { x: b.lx, y: b.ly, class: 't-ui', 'font-size': 15, 'font-weight': 650, style: 'fill:var(--text)' }, root);
+        svg('rect', { x: b.x, y: b.y, width: b.w, height: b.h, rx: 18, style: 'fill:none;stroke:var(--lb-frame);stroke-width:1.6;stroke-dasharray:7 6;opacity:.85' }, root);
+        const tx = svg('text', { x: b.lx, y: b.ly, class: 't-ui', 'font-size': 15, 'font-weight': 650, style: 'fill:var(--lb-frame-ink)' }, root);
         tx.textContent = b.label;
       }
       // geometry helpers
@@ -1669,7 +1944,7 @@ const BlockFig = (() => {
         const d = Math.max(14, dist * 0.5);
         const path = `M${p0[0]},${p0[1]} C${p0[0] + dx * d},${p0[1] + dy * d} ${p1[0] - dx * d},${p1[1] - dy * d} ${p1[0]},${p1[1]}`;
         const base = svg('path', { d: path, style: 'fill:none;stroke:var(--line-strong);stroke-width:2' }, gEdges);
-        const back = svg('path', { d: path, style: 'fill:none;stroke:var(--accent);stroke-width:2.6;stroke-linecap:round;opacity:0' }, gEdges);
+        const back = svg('path', { d: path, style: 'fill:none;stroke:var(--green);stroke-width:2.6;stroke-linecap:round;opacity:0' }, gEdges);
         const len = base.getTotalLength();
         st.edges[a + '-' + b] = { base, back, len };
       }
@@ -1704,8 +1979,8 @@ const BlockFig = (() => {
         const [x, y] = N[id];
         const g = svg('g', null, gNodes);
         const dot = svg('circle', { cx: x, cy: y, r: 4, style: 'fill:var(--muted)' }, g);
-        const c = svg('circle', { cx: x, cy: y, r: PR, style: 'fill:var(--bg-card);stroke:var(--accent);stroke-width:2' }, g);
-        const tx = svg('text', { x, y: y + 6, 'text-anchor': 'middle', class: 't-math', 'font-size': 18, style: 'fill:var(--accent)' }, g);
+        const c = svg('circle', { cx: x, cy: y, r: PR, style: 'fill:var(--bg-card);stroke:var(--lb-frame);stroke-width:2' }, g);
+        const tx = svg('text', { x, y: y + 6, 'text-anchor': 'middle', class: 't-math', 'font-size': 18, style: 'fill:var(--lb-frame-ink)' }, g);
         tx.textContent = 'E';
         st.probes[id] = { dot, c, tx };
       }
@@ -1719,7 +1994,7 @@ const BlockFig = (() => {
       st.pf = {}; st.pb = {};
       for (const k in st.edges) {
         st.pf[k] = svg('circle', { r: 5, style: 'fill:var(--ink);opacity:0' }, gP);
-        st.pb[k] = svg('circle', { r: 5, style: 'fill:var(--accent);opacity:0' }, gP);
+        st.pb[k] = svg('circle', { r: 5, style: 'fill:var(--green);opacity:0' }, gP);
       }
       S = st;
       newLayerMasks();
@@ -1778,8 +2053,8 @@ const BlockFig = (() => {
         p.dot.style.display = show ? 'none' : '';
         const hit = T.probes.find((x) => x[0] === id);
         const v = hit ? prog(t, hit[1], hit[1] + 0.3) : 0;
-        p.c.style.fill = v > 0 ? `color-mix(in srgb, var(--accent) ${Math.round(v * 100)}%, var(--bg-card))` : 'var(--bg-card)';
-        p.tx.style.fill = v > 0.5 ? 'var(--on-accent)' : 'var(--accent)';
+        p.c.style.fill = v > 0 ? `color-mix(in srgb, var(--lb-frame) ${Math.round(v * 100)}%, var(--bg-card))` : 'var(--bg-card)';
+        p.tx.style.fill = v > 0.5 ? 'var(--bg-card)' : 'var(--lb-frame-ink)';
         p.c.setAttribute('r', String(PR + 4 * Math.sin(Math.PI * v)));
       }
       // tiles
@@ -1790,7 +2065,7 @@ const BlockFig = (() => {
         const flip = T.flips.find((x) => x[0].includes(id));
         const fp = flip ? easeOut(prog(t, flip[1], flip[2])) : 0;
         const touched = flip && t >= flip[1];
-        tl.frame.style.stroke = flash > 0 || touched ? 'var(--accent)' : 'var(--line-strong)';
+        tl.frame.style.stroke = flash > 0 || touched ? 'var(--green)' : 'var(--line-strong)';
         tl.frame.style.strokeWidth = String(1.5 + 1.5 * flash + (touched ? 0.5 : 0));
         const s = tl.state;
         tl.cells.forEach((c, i) => {
@@ -1848,6 +2123,127 @@ const BlockFig = (() => {
     setPlaying(playing);
   }
   return { init };
+})();
+
+/* The worked example of Figure 2b in the paper, as two worksheets.
+   Score: S = |W| ⊙ |∂E/∂W|, cell by cell. Swap: pruned weights sorted by S from high to low, kept weights
+   from low to high, paired in order; a fraction α of the pairs with a positive gain is swapped.
+   Every number below is the paper's. */
+const Sheet = (() => {
+  const W = [[1, 1, 4, 3], [1, 11, 4, 11], [4, 2, 4, 8], [1, 5, 5, 3]];
+  const G = [[2, 0.1, 0.4, 0.5], [1, 0.1, 0.3, 0.1], [0.3, 0.1, 0.2, 0.1], [0.5, 0.2, 0.1, 0.5]];
+  const M0 = [[0, 0, 0, 0], [0, 1, 0, 1], [1, 1, 1, 0], [0, 1, 1, 1]];
+  const r2 = (v) => Math.round(v * 100) / 100;
+  const S = W.map((row, i) => row.map((w, j) => r2(Math.abs(w) * Math.abs(G[i][j]))));
+  const cells = []; for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) cells.push([i, j]);
+  const grow = cells.filter(([i, j]) => !M0[i][j]).sort((a, b) => S[b[0]][b[1]] - S[a[0]][a[1]] || a[0] - b[0] || a[1] - b[1]);
+  const prune = cells.filter(([i, j]) => M0[i][j]).sort((a, b) => S[a[0]][a[1]] - S[b[0]][b[1]] || a[0] - b[0] || a[1] - b[1]);
+  const pairs = grow.map((g, k) => ({ g, p: prune[k], gain: r2(S[g[0]][g[1]] - S[prune[k][0]][prune[k][1]]) }));
+  const npos = pairs.filter((x) => x.gain > 0).length;
+  const num = (v) => (Number.isInteger(v) ? String(v) : String(v));
+  const sgn = (v) => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v);
+  const sub = (i, j) => `${i + 1}${j + 1}`;
+  const el = (tag, cls, parent, text) => U.el(tag, cls, parent, text);
+
+  // one 4 × 4 grid of tiles; shade is the value relative to the largest in the matrix
+  function grid(host, vals, kind, label) {
+    const max = Math.max(...vals.flat().map(Math.abs));
+    host.setAttribute('role', 'img'); host.setAttribute('aria-label', label);
+    const tiles = [];
+    vals.forEach((row, i) => row.forEach((v, j) => {
+      const t = el('span', 'ws-t ws-' + kind, host, num(v));
+      if (kind !== 'm') { const p = Math.round(10 + 78 * Math.abs(v) / max); t.style.setProperty('--p', p + '%'); if (p > 56) t.classList.add('hi'); }
+      else t.classList.add(v ? 'one' : 'zero');
+      t.style.setProperty('--d', ((i * 4 + j) * 28) + 'ms');
+      t.dataset.i = i; t.dataset.j = j;
+      tiles.push(t);
+    }));
+    return tiles;
+  }
+  const at = (tiles, i, j) => tiles[i * 4 + j];
+
+  function score() {
+    const fig = document.getElementById('ws-score'); if (!fig) return;
+    const read = fig.querySelector('.ws-read'), def = read.innerHTML;
+    const T = {
+      W: grid(fig.querySelector('[data-m="W"]'), W, 'w', 'Weights W: ' + W.map((r) => r.join(', ')).join('; ')),
+      G: grid(fig.querySelector('[data-m="G"]'), G, 'g', 'Gradients of the block error: ' + G.map((r) => r.join(', ')).join('; ')),
+      S: grid(fig.querySelector('[data-m="S"]'), S, 's', 'Scores: ' + S.map((r) => r.join(', ')).join('; '))
+    };
+    // the S tiles fill in after the two factors
+    T.G.forEach((t) => t.style.setProperty('--d', (parseInt(t.style.getPropertyValue('--d'), 10) + 160) + 'ms'));
+    T.S.forEach((t) => t.style.setProperty('--d', (parseInt(t.style.getPropertyValue('--d'), 10) + 640) + 'ms'));
+    let cur = null;
+    const show = (i, j) => {
+      if (cur) Object.values(T).forEach((ts) => at(ts, cur[0], cur[1]).classList.remove('on'));
+      cur = i == null ? null : [i, j];
+      if (!cur) { read.innerHTML = def; return; }
+      Object.values(T).forEach((ts) => at(ts, i, j).classList.add('on'));
+      read.innerHTML = `<span class="m">W<sub>${sub(i, j)}</sub></span> = ${W[i][j]}, <span class="m"><span class="u">|</span>∂E/∂W<sub>${sub(i, j)}</sub><span class="u">|</span></span> = ${G[i][j]}, so <span class="m">S<sub>${sub(i, j)}</sub></span> = <b>${S[i][j]}</b>.`;
+    };
+    Object.values(T).forEach((ts) => ts.forEach((t) => {
+      t.tabIndex = -1;
+      t.addEventListener('pointerenter', () => show(+t.dataset.i, +t.dataset.j));
+    }));
+    fig.querySelector('.ws-row').addEventListener('pointerleave', () => show(null));
+    U.visible(fig, (v) => { if (v) fig.classList.add('is-in'); }, 0.3);
+  }
+
+  function swap() {
+    const fig = document.getElementById('ws-swap'); if (!fig) return;
+    const T0 = grid(fig.querySelector('[data-m="M0"]'), M0, 'm', 'Starting mask, 1 = kept, 0 = pruned: ' + M0.map((r) => r.join(' ')).join('; '));
+    const host1 = fig.querySelector('[data-m="M1"]');
+    const T1 = grid(host1, M0, 'm', '');
+    const q = fig.querySelector('.ws-pairs');
+    const cols = pairs.map((x, k) => {
+      const c = el('div', 'ws-pair' + (x.gain > 0 ? ' pos' : ''), q);
+      c.style.setProperty('--d', (k * 40) + 'ms');
+      const gt = el('span', 'ws-t ws-s', c, num(S[x.g[0]][x.g[1]]));
+      const pg = Math.round(10 + 78 * S[x.g[0]][x.g[1]] / 2); gt.style.setProperty('--p', pg + '%'); if (pg > 56) gt.classList.add('hi');
+      el('span', 'ws-gain', c, sgn(x.gain));
+      const pt = el('span', 'ws-t ws-s', c, num(S[x.p[0]][x.p[1]]));
+      const pp = Math.round(10 + 78 * S[x.p[0]][x.p[1]] / 2); pt.style.setProperty('--p', pp + '%'); if (pp > 56) pt.classList.add('hi');
+      c.title = `Pair ${k + 1}: grow W${sub(...x.g)} (S = ${S[x.g[0]][x.g[1]]}), prune W${sub(...x.p)} (S = ${S[x.p[0]][x.p[1]]}), gain ${sgn(x.gain)}`;
+      return c;
+    });
+    const read = fig.querySelector('.ws-read');
+    let alpha = 0.5, hot = -1;
+    function render() {
+      const n = Math.floor(npos * alpha + 1e-9);
+      cols.forEach((c, k) => c.classList.toggle('is-sw', k < n));
+      const M1 = M0.map((r) => r.slice());
+      pairs.slice(0, n).forEach((x) => { M1[x.g[0]][x.g[1]] = 1; M1[x.p[0]][x.p[1]] = 0; });
+      T1.forEach((t) => {
+        const i = +t.dataset.i, j = +t.dataset.j, v = M1[i][j];
+        t.textContent = String(v);
+        t.classList.toggle('one', !!v); t.classList.toggle('zero', !v);
+        t.classList.toggle('grown', v === 1 && M0[i][j] === 0);
+        t.classList.toggle('trimmed', v === 0 && M0[i][j] === 1);
+      });
+      host1.setAttribute('role', 'img');
+      host1.setAttribute('aria-label', 'Rebuilt mask: ' + M1.map((r) => r.join(' ')).join('; '));
+      const gained = r2(pairs.slice(0, n).reduce((a, x) => a + x.gain, 0));
+      read.innerHTML = n === 0 ? `${npos} of the ${pairs.length} pairs have a positive gain; at <span class="m">α</span> = 0 the mask stays as it is.`
+        : `<span class="m">N</span> = ${Math.round(alpha * 100)}% × ${npos} = <b>${n}</b> pair${n > 1 ? 's' : ''} swapped, gain ${pairs.slice(0, n).map((x) => sgn(x.gain)).join(', ')}. Still 8 of 16 weights kept.`;
+      read.dataset.gain = gained;
+      lightPair(hot);
+    }
+    function lightPair(k) {
+      [T0, T1].forEach((ts) => ts.forEach((t) => t.classList.remove('on')));
+      cols.forEach((c, m) => c.classList.toggle('on', m === k));
+      hot = k;
+      if (k < 0) return;
+      const x = pairs[k];
+      [T0, T1].forEach((ts) => { at(ts, ...x.g).classList.add('on'); at(ts, ...x.p).classList.add('on'); });
+    }
+    cols.forEach((c, k) => { c.addEventListener('pointerenter', () => lightPair(k)); c.addEventListener('pointerleave', () => lightPair(-1)); });
+    U.seg(document.getElementById('ws-alpha'), (v) => { alpha = parseFloat(v); render(); });
+    render();
+    U.visible(fig, (v) => { if (v) fig.classList.add('is-in'); }, 0.3);
+  }
+
+  function init() { score(); swap(); }
+  return { init, data: { W, G, S, M0, pairs, npos } };
 })();
 
 /* Results: numbers transcribed from the ICCAD 2025 paper (Tables I-IX). */
@@ -2193,11 +2589,87 @@ const Results = (() => {
     table('dep-gpu', null, ['Method', ...T9.cols], T9.rows.map(([n, v]) => ({ cls: n.includes('Barber') ? 'ours' : null, cells: [{ t: n }, ...v.map((x) => ({ t: x.toFixed(2) }))] })));
   }
 
-  function init() { initDumbbell(); initHigh(); initTables(); }
+  // ---------- one pass against DSnoT (Table V): bars on a linear scale per starting mask ----------
+  function initDSnoT() {
+    const host = document.getElementById('ds-fig'); if (!host) return;
+    const dense = 6.136;
+    const G = DATA.t5.groups.map(([g, rows]) => ({ g, rows: rows.map(([n, v]) => ({ n: n === 'Starting mask' ? g : n, v: v[0] })) }));
+    function render() {
+      const plot = host.querySelector('.chart-plot') || U.el('div', 'chart-plot', host);
+      const W = Math.max(280, Math.floor(plot.clientWidth));
+      const narrow = W < 460, labW = narrow ? 92 : 112, valW = narrow ? 50 : 58, rowH = 30, headH = 26, gap = 18;
+      const H = G.length * (headH + 3 * rowH) + (G.length - 1) * gap + 4;
+      plot.replaceChildren();
+      const s = svg('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': 'WikiText-2 perplexity of LLaMA3-8B at 50% sparsity. From a magnitude mask: 205.5, with DSnoT 47.52, with LLM-Barber 10.98. From a Wanda mask: 9.821, with DSnoT 9.562, with LLM-Barber 9.451. Dense model 6.136.' }, plot);
+      let y = 0;
+      G.forEach((grp) => {
+        const max = grp.rows[0].v, x0 = labW, x1 = W - valW;
+        const X = (v) => x0 + (x1 - x0) * v / max;
+        const ht = svg('text', { x: 0, y: y + 15, class: 'lbl' }, s); ht.textContent = 'From a ' + (grp.g === 'Magnitude' ? 'magnitude' : grp.g) + ' mask';
+        const top = y + headH;
+        svg('line', { x1: X(dense), x2: X(dense), y1: top - 4, y2: top + 3 * rowH - 2, class: 'ds-dense' }, s);
+        grp.rows.forEach((r, i) => {
+          const cy = top + i * rowH + rowH / 2, me = i === 2;
+          const lab = svg('text', { x: labW - 10, y: cy + 4, 'text-anchor': 'end', class: me ? 'tx-strong' : 'tx-ink' }, s); lab.textContent = i ? r.n : 'Starting mask';
+          svg('path', { d: roundedRight(x0, cy - 8, Math.max(2, X(r.v) - x0), 16, 4), class: ['ds-bar-start', 'ds-bar-ds', 'ds-bar-lb'][i] }, s);
+          const v = svg('text', { x: X(r.v) + 7, y: cy + 4, class: me ? 'val' : 'val mut' }, s); v.textContent = fmt(r.v);
+        });
+        y = top + 3 * rowH + gap;
+      });
+    }
+    let lastW = 0;
+    new ResizeObserver(() => { const w = host.clientWidth; if (w !== lastW) { lastW = w; render(); } }).observe(host);
+    render();
+  }
+  function roundedRight(x, y, w, h, r) { r = Math.min(r, w, h / 2); return `M${x},${y} H${x + w - r} Q${x + w},${y} ${x + w},${y + r} V${y + h - r} Q${x + w},${y + h} ${x + w - r},${y + h} H${x} Z`; }
+
+  // ---------- zero-shot mean accuracy (Table IV): start -> with LLM-Barber, dense as a tick ----------
+  function initZS() {
+    const host = document.getElementById('zs-fig'); if (!host) return;
+    const R = DATA.t4.rows, models = [...new Set(R.map((r) => r[0]))];
+    const mean = (m, k) => R.filter((r) => r[0] === m)[k][2][6];  // rows per model: dense, magnitude, +barber, wanda, +barber
+    const groups = models.map((m) => ({ m, dense: mean(m, 0), rows: [['Magnitude', mean(m, 1), mean(m, 2)], ['Wanda', mean(m, 3), mean(m, 4)]] }));
+    function render() {
+      const plot = host.querySelector('.chart-plot') || U.el('div', 'chart-plot', host);
+      const W = Math.max(280, Math.floor(plot.clientWidth));
+      const narrow = W < 460, labW = narrow ? 76 : 96, valW = narrow ? 92 : 108, rowH = 28, headH = 24, gap = 12, axisH = 26;
+      const H = groups.length * (headH + 2 * rowH) + (groups.length - 1) * gap + axisH;
+      const lo = 30, hi = 65, x0 = labW, x1 = W - valW, X = (v) => x0 + (x1 - x0) * (v - lo) / (hi - lo);
+      plot.replaceChildren();
+      const s = svg('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': 'Mean zero-shot accuracy at 50% sparsity. ' + groups.map((g) => `${g.m}: dense ${g.dense}; magnitude ${g.rows[0][1]} to ${g.rows[0][2]}; Wanda ${g.rows[1][1]} to ${g.rows[1][2]}.`).join(' ') }, plot);
+      const gl = svg('g', { class: 'grid' }, s);
+      [30, 40, 50, 60].forEach((v) => {
+        svg('line', { x1: X(v), x2: X(v), y1: 0, y2: H - axisH + 2 }, gl);
+        const tx = svg('text', { x: X(v), y: H - 6, 'text-anchor': 'middle', class: 'tick' }, s); tx.textContent = v + '%';
+      });
+      let y = 0;
+      groups.forEach((g) => {
+        const ht = svg('text', { x: 0, y: y + 16, class: 'lbl' }, s); ht.textContent = g.m;
+        const top = y + headH;
+        svg('line', { x1: X(g.dense), x2: X(g.dense), y1: top + 4, y2: top + 2 * rowH - 4, class: 'zs-dense' }, s);
+        g.rows.forEach(([n, a, b], i) => {
+          const cy = top + i * rowH + rowH / 2;
+          const lab = svg('text', { x: labW - 12, y: cy + 4, 'text-anchor': 'end', class: 'tx-ink' }, s); lab.textContent = n;
+          svg('line', { x1: X(a), x2: X(b), y1: cy, y2: cy, class: 'zs-gain' }, s);
+          svg('circle', { cx: X(a), cy, r: 5.5, class: 'zs-start' }, s);
+          svg('circle', { cx: X(b), cy, r: 6, class: 'zs-lb' }, s);
+          const v = svg('text', { x: W, y: cy + 4, 'text-anchor': 'end', class: 'val' }, s);
+          const t1 = svg('tspan', { class: 'mut' }, v); t1.textContent = a.toFixed(2) + ' → ';
+          const t2 = svg('tspan', null, v); t2.textContent = b.toFixed(2);
+        });
+        y = top + 2 * rowH + gap;
+      });
+    }
+    let lastW = 0;
+    new ResizeObserver(() => { const w = host.clientWidth; if (w !== lastW) { lastW = w; render(); } }).observe(host);
+    render();
+  }
+
+  function init() { initDumbbell(); initDSnoT(); initZS(); initHigh(); initTables(); }
   return { init };
 })();
 
-Kit.boot([['demo', () => Demo.init()], ['blockfig', () => BlockFig.init()], ['results', () => Results.init()]]);
+Kit.boot([['demo', () => Demo.init()], ['blockfig', () => BlockFig.init()], ['sheet', () => Sheet.init()], ['results', () => Results.init()]]);
 </script>
 </body>
 </html>
