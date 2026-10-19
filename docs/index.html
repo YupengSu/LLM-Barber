@@ -34,9 +34,11 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600;1,6..72,500&amp;display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,700&amp;display=swap">
+<link rel="preload" href="static/fonts/kit-math.woff2" as="font" type="font/woff2" crossorigin>
 <style>
 :root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
 [hidden] { display: none !important; }
+@font-face { font-family: "Kit Math"; src: url("static/fonts/kit-math.woff2") format("woff2"); font-display: block; }
 /* ===========================================================
    Project-page kit for yupengsu.github.io
    Tokens, type and chrome come from the homepage (homepage.css):
@@ -57,7 +59,7 @@
   --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --serif: "Newsreader", Georgia, "Times New Roman", serif;
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
-  --font-math: "Newsreader", "STIX Two Math", "Cambria Math", Georgia, serif;
+  --font-math: "Kit Math", "Latin Modern Math", "STIX Two Math", "Cambria Math", math; /* Kit Math: Latin Modern Math (the papers' Computer Modern), subset, served by build.py */
   --display: var(--serif); /* a project sets its own display face for the title, nav name and headings */
   /* type scale and grid, shared by every page */
   --fs-cap: .875rem; --fs-ui: .86rem; --fs-body: 1.0625rem; --fs-lead: 1.125rem; --fs-h3: 1.36rem; --fs-h2: clamp(1.9rem, 3.1vw, 2.4rem);
@@ -106,8 +108,10 @@ p, ul, ol, figure, dl, dd { margin: 0; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 .wrap { width: 100%; max-width: var(--maxw); margin-inline: auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 @media (min-width: 720px) { .wrap { padding-left: max(28px, env(safe-area-inset-left, 0px)); padding-right: max(28px, env(safe-area-inset-right, 0px)); } }
-.m { font-family: var(--font-math); font-style: italic; font-weight: 500; white-space: nowrap; }
-.m .u { font-style: normal; } /* upright bars, brackets and operators inside inline math */
+/* math: MathML from the papers' TeX (texmath.py), set in --font-math. Latin Modern has a small x-height next to Inter,
+   so inline math runs larger than the text, as KaTeX does (1.21em) */
+math { font-family: var(--font-math); }
+math.m { font-size: 1.16em; }
 .num { font-variant-numeric: tabular-nums; }
 code { font-family: var(--mono); font-size: .86em; }
 :not(pre) > code { background: var(--bg-soft); border: 1px solid var(--line); padding: .04em .36em; border-radius: 5px; white-space: nowrap; color: var(--ink); }
@@ -166,7 +170,7 @@ code { font-family: var(--mono); font-size: .86em; }
 .seg button:hover { color: var(--ink); }
 .seg button[aria-pressed="true"] { background: var(--bg-card); color: var(--ink); box-shadow: var(--shadow-sm); }
 .seg button[disabled] { opacity: .4; cursor: not-allowed; }
-.seg .m { font-size: .95rem; }
+.seg .m { font-size: 1.08rem; }
 input[type="range"] { width: 100%; accent-color: var(--accent); height: 28px; margin: 0; }
 
 /* ---------- hero ---------- */
@@ -293,18 +297,18 @@ input[type="range"] { width: 100%; accent-color: var(--accent); height: 28px; ma
 .sw.line { width: 18px; height: 3px; border-radius: 2px; }
 .sw.dot { border-radius: 50%; }
 .eq { padding: 14px 18px; background: var(--bg-soft); border-radius: var(--radius); overflow-x: auto; display: grid; gap: 6px; }
-.eq math { font-family: var(--font-math); font-size: 1.3rem; }
-/* fences marked .f come from a math font when one is installed, so they stretch around fractions */
-.eq mo.f { font-family: "STIX Two Math", "Cambria Math", "Latin Modern Math", var(--font-math); }
+.eq math { font-size: 1.3rem; }
 .eq .tag { font-size: .8rem; color: var(--muted); }
 /* an equation box in the figure column, with a title; .eq-wide / .eq-narrow are two layouts of one equation, the narrow one for phones */
 .eq--fig { gap: 10px; padding: 16px 20px; }
 .eq--fig .fig-title { text-align: left; }
 .eq--fig .tag { font-size: var(--fs-cap); line-height: 1.55; text-align: left; }
 .eq-narrow { display: none; }
-.eq .lines mtd { padding: 2px 0; }
-.eq .lines > mtr > mtd:first-child { text-align: right; padding-right: .3em; }
-.eq .lines > mtr > mtd:last-child { text-align: left; }
+/* Temml output: cramped scripts as in TeX; array cells */
+mfrac > :nth-child(2), msqrt, mover > :first-child { math-shift: compact; }
+.tml-right { text-align: right; } .tml-left { text-align: left; }
+@supports (not (-webkit-backdrop-filter: blur(1px))) and (not (-moz-appearance: none)) { .tml-right { text-align: -webkit-right; } .tml-left { text-align: -webkit-left; } }
+mtable.tml-jot > mtr > mtd { padding-top: .7ex; padding-bottom: .7ex; }
 .eq-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 22px; }
 @media (max-width: 560px) { .eq, .eq--fig { padding: 12px 14px; } .eq math, .story .eq math { font-size: 1.08rem; } .eq-wide { display: none; } .eq-narrow { display: revert; } }
 @media (max-width: 380px) { .eq math, .story .eq math { font-size: 1rem; } }
@@ -483,7 +487,7 @@ pre.code .k { color: var(--blue); font-weight: 600; }
 .bf-foot { margin-top: 10px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 20px; }
 .bf-eq { font-size: .86rem; color: var(--text); }
 svg .t-ui { font-family: var(--font); }
-svg .t-math { font-family: var(--font-math); font-style: italic; font-weight: 500; }
+svg .t-math { font-family: var(--font-math); font-style: normal; font-weight: 400; } /* bold letters as Unicode math (𝐖), not synthesized */
 
 /* numeric tiles */
 .sheet .panel { padding: clamp(18px, 3vw, 30px); }
@@ -650,7 +654,7 @@ svg tspan.mut { fill: var(--muted); font-weight: 500; }
               <button type="button" data-v="wanda" aria-pressed="false">Wanda</button>
             </div></div>
           <div class="ctl demo-alpha">
-            <label class="ctl-label" for="demo-alpha"><span>Swap ratio <span class="m">α</span></span><output id="demo-alpha-o" for="demo-alpha">50%</output></label>
+            <label class="ctl-label" for="demo-alpha"><span>Swap ratio <math class="m"><semantics><mi>α</mi><annotation encoding="application/x-tex">\alpha</annotation></semantics></math></span><output id="demo-alpha-o" for="demo-alpha">50%</output></label>
             <input type="range" id="demo-alpha" min="0" max="100" step="1" value="50">
           </div>
         </div>
@@ -672,14 +676,14 @@ svg tspan.mut { fill: var(--muted); font-weight: 500; }
               </div></div>
             <div class="ctl"><span class="ctl-label" id="dm-me-l">Score</span>
               <div class="seg" role="group" aria-labelledby="dm-me-l" data-key="metric">
-                <button type="button" data-v="WD" aria-pressed="true"><span class="m"><span class="u">|</span>W<span class="u">|·|</span>∂E/∂W<span class="u">|</span></span></button>
-                <button type="button" data-v="W" aria-pressed="false"><span class="m"><span class="u">|</span>W<span class="u">|</span></span></button>
-                <button type="button" data-v="D" aria-pressed="false"><span class="m"><span class="u">|</span>∂E/∂W<span class="u">|</span></span></button>
+                <button type="button" data-v="WD" aria-pressed="true"><math class="m"><semantics><mrow><mi>|</mi><mi>𝐖</mi><mi>|</mi><mo>⋅</mo><mi>|</mi><mi>∂</mi><mi>𝐄</mi><mi>/</mi><mi>∂</mi><mi>𝐖</mi><mi>|</mi></mrow><annotation encoding="application/x-tex">|\mat{W}| \cdot |\partial\mat{E}/\partial\mat{W}|</annotation></semantics></math></button>
+                <button type="button" data-v="W" aria-pressed="false"><math class="m"><semantics><mrow><mi>|</mi><mi>𝐖</mi><mi>|</mi></mrow><annotation encoding="application/x-tex">|\mat{W}|</annotation></semantics></math></button>
+                <button type="button" data-v="D" aria-pressed="false"><math class="m"><semantics><mrow><mi>|</mi><mi>∂</mi><mi>𝐄</mi><mi>/</mi><mi>∂</mi><mi>𝐖</mi><mi>|</mi></mrow><annotation encoding="application/x-tex">|\partial\mat{E}/\partial\mat{W}|</annotation></semantics></math></button>
               </div></div>
             <button class="btn btn--sm" type="button" id="demo-seed">New random block</button>
           </div>
           <div class="demo-charts">
-            <div class="card chart-card" id="demo-err"><h4>Block error against <span class="m">α</span></h4><p class="sub-l">Too many swaps hurt again</p></div>
+            <div class="card chart-card" id="demo-err"><h4>Block error against <math class="m"><semantics><mi>𝜶</mi><annotation encoding="application/x-tex">\boldsymbol{\alpha}</annotation></semantics></math></h4><p class="sub-l">Too many swaps hurt again</p></div>
             <div class="card chart-card" id="demo-gain"><h4>Gain of each candidate pair</h4><p class="sub-l">A few pairs carry most of the gain</p></div>
           </div>
         </details>
@@ -694,9 +698,9 @@ svg tspan.mut { fill: var(--muted); font-weight: 500; }
           <h3 class="story__title">Measure the error at the block</h3>
         </div>
         <div class="band__b">
-          <p>Layer-wise pruners fit each projection to its own output, <span class="m"><span class="u">‖</span>WX <span class="u">− (</span>W <span class="u">⊙</span> M<span class="u">)</span>X<span class="u">‖²</span></span>, and the small biases add up from layer to layer. LLM-Barber takes one error at the output of the whole block, so the masks of all its projections are judged together:</p>
+          <p>Layer-wise pruners fit each projection to its own output, <math class="m"><semantics><mrow><mi>‖</mi><mi>𝐖</mi><mi>𝐗</mi><mo>−</mo><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><mi>𝐖</mi><mo>⊙</mo><mi>𝐌</mi><mo fence="true" form="postfix" stretchy="false">)</mo></mrow><mi>𝐗</mi><msubsup><mpadded depth="0"><mi>‖</mi></mpadded><mn>2</mn><mn>2</mn></msubsup></mrow><annotation encoding="application/x-tex">\|\mat{W}\mat{X} - (\mat{W} \odot \mat{M})\mat{X}\|_2^2</annotation></semantics></math>, and the small biases add up from layer to layer. LLM-Barber takes one error at the output of the whole block, so the masks of all its projections are judged together:</p>
           <div class="eq" role="group" aria-label="Block-aware reconstruction error">
-            <math display="block"><mrow><mi class="c-e">E</mi><mo>=</mo><msubsup><mrow><mo class="f">‖</mo><mi>Block</mi><mo>(</mo><mi>W</mi><mo>,</mo><mi>X</mi><mo>)</mo><mo>−</mo><mi>Block</mi><mo>(</mo><mi>W</mi><mo>⊙</mo><mi>M</mi><mo>,</mo><mi>X</mi><mo>)</mo><mo class="f">‖</mo></mrow><mn>2</mn><mn>2</mn></msubsup></mrow></math>
+            <math display="block"><semantics><mrow><mi class="c-e">𝐄</mi><mo>=</mo><mi>‖</mi><mpadded lspace="0"><mi>Block</mi></mpadded><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><mi>𝐖</mi><mo separator="true">,</mo><mi>𝐗</mi><mo fence="true" form="postfix" stretchy="false">)</mo></mrow><mo>−</mo><mpadded lspace="0"><mi>Block</mi></mpadded><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><mi>𝐖</mi><mo>⊙</mo><mi>𝐌</mi><mo separator="true">,</mo><mi>𝐗</mi><mo fence="true" form="postfix" stretchy="false">)</mo></mrow><msubsup><mpadded depth="0"><mi>‖</mi></mpadded><mn>2</mn><mn>2</mn></msubsup></mrow><annotation encoding="application/x-tex">\class{c-e}{\mat{E}} = \|\mathrm{Block}(\mat{W}, \mat{X}) - \mathrm{Block}(\mat{W} \odot \mat{M}, \mat{X})\|_2^2</annotation></semantics></math>
           </div>
         </div>
       </div>
@@ -718,7 +722,7 @@ svg tspan.mut { fill: var(--muted); font-weight: 500; }
             <p class="bf-eq" id="bf-eq"></p>
           </div>
         </div>
-        <figcaption class="fig-cap">The forward pass reaches each block's output, and the gradient of <span class="m">E</span> flows back to all of its projections, whose masks are then rebuilt. Each rebuilt block feeds the next: one forward pass for the model and one local backward pass per block.</figcaption>
+        <figcaption class="fig-cap">The forward pass reaches each block's output, and the gradient of <math class="m"><semantics><mi>𝐄</mi><annotation encoding="application/x-tex">\mat{E}</annotation></semantics></math> flows back to all of its projections, whose masks are then rebuilt. Each rebuilt block feeds the next: one forward pass for the model and one local backward pass per block.</figcaption>
       </figure>
     </div>
 
@@ -729,23 +733,23 @@ svg tspan.mut { fill: var(--muted); font-weight: 500; }
           <h3 class="story__title">Score every weight with its gradient</h3>
         </div>
         <div class="band__b">
-          <p>At the dense model <span class="m">E</span> is zero and its gradient vanishes, which is why methods such as SparseGPT turn to the Hessian. After pruning <span class="m">E</span> is no longer zero, so the first-order term is enough. Pruning or regrowing a weight changes it by <span class="m"><span class="u">|Δ</span>W<sub>ij</sub><span class="u">| = |</span>W<sub>ij</sub><span class="u">|</span></span>, which gives the score:</p>
+          <p>At the dense model <math class="m"><semantics><mi>𝐄</mi><annotation encoding="application/x-tex">\mat{E}</annotation></semantics></math> is zero and its gradient vanishes, which is why methods such as SparseGPT turn to the Hessian. After pruning <math class="m"><semantics><mi>𝐄</mi><annotation encoding="application/x-tex">\mat{E}</annotation></semantics></math> is no longer zero, so the first-order term is enough. Pruning or regrowing a weight changes it by <math class="m"><semantics><mrow><mi>|</mi><mrow><mi mathvariant="normal">Δ</mi></mrow><msub><mi>𝐖</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mi>|</mi><mo>=</mo><mi>|</mi><msub><mi>𝐖</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mi>|</mi></mrow><annotation encoding="application/x-tex">|\Delta\mat{W}_{ij}| = |\mat{W}_{ij}|</annotation></semantics></math>, which gives the score:</p>
           <div class="eq eq-row" role="group" aria-label="First-order change of the error and the resulting score">
-            <math display="block"><mrow><mi mathvariant="normal">Δ</mi><mi class="c-e">E</mi><mo>≈</mo><mfrac><mrow><mo>∂</mo><mi class="c-e">E</mi></mrow><mrow><mo>∂</mo><mi>W</mi></mrow></mfrac><mo>·</mo><mi mathvariant="normal">Δ</mi><mi>W</mi></mrow></math>
-            <math display="block"><mrow><mo>⇒</mo><mspace width="0.5em"></mspace><msub><mi class="c-s">S</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><mrow><mo class="f">|</mo><msub><mi class="c-w">W</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo class="f">|</mo></mrow><mo>·</mo><mrow><mo class="f">|</mo><mfrac><mrow><mo>∂</mo><mi class="c-e">E</mi></mrow><mrow><mo>∂</mo><msub><mi>W</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mrow></mfrac><mo class="f">|</mo></mrow></mrow></math>
+            <math display="block"><semantics><mrow><mrow><mi mathvariant="normal">Δ</mi></mrow><mi class="c-e">𝐄</mi><mo>≈</mo><mfrac><mrow><mi>∂</mi><mi class="c-e">𝐄</mi></mrow><mrow><mi>∂</mi><mi>𝐖</mi></mrow></mfrac><mo>⋅</mo><mrow><mi mathvariant="normal">Δ</mi></mrow><mi>𝐖</mi></mrow><annotation encoding="application/x-tex">\Delta\class{c-e}{\mat{E}} \approx \frac{\partial \class{c-e}{\mat{E}}}{\partial \mat{W}} \cdot \Delta\mat{W}</annotation></semantics></math>
+            <math display="block"><semantics><mrow><mo stretchy="false">⇒</mo><mspace width="1em"></mspace><msub><mi class="c-s">𝐒</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><mi>|</mi><msub><mi class="c-w">𝐖</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mi>|</mi><mo>⋅</mo><mrow><mo fence="true" form="prefix" stretchy="true">|</mo><mfrac><mrow><mi>∂</mi><mi class="c-e">𝐄</mi></mrow><mrow><mi>∂</mi><msub><mi>𝐖</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mrow></mfrac><mo fence="true" form="postfix" stretchy="true">|</mo></mrow></mrow><annotation encoding="application/x-tex">\Rightarrow\quad \class{c-s}{\mat{S}}_{ij} = |\class{c-w}{\mat{W}}_{ij}| \cdot \left|\frac{\partial \class{c-e}{\mat{E}}}{\partial \mat{W}_{ij}}\right|</annotation></semantics></math>
           </div>
         </div>
       </div>
       <figure class="band__fig sheet" id="ws-score">
         <div class="panel">
           <div class="ws-row">
-            <div class="ws-mat"><p class="ws-h k-w">Weight <span class="m">W</span></p><div class="ws-grid" data-m="W"></div></div>
+            <div class="ws-mat"><p class="ws-h k-w">Weight <math class="m"><semantics><mi>𝐖</mi><annotation encoding="application/x-tex">\mat{W}</annotation></semantics></math></p><div class="ws-grid" data-m="W"></div></div>
             <span class="ws-op" aria-hidden="true">⊙</span>
-            <div class="ws-mat"><p class="ws-h k-g">Gradient <span class="m"><span class="u">|</span>∂E/∂W<span class="u">|</span></span></p><div class="ws-grid" data-m="G"></div></div>
+            <div class="ws-mat"><p class="ws-h k-g">Gradient <math class="m"><semantics><mrow><mi>|</mi><mi>∂</mi><mi>𝐄</mi><mi>/</mi><mi>∂</mi><mi>𝐖</mi><mi>|</mi></mrow><annotation encoding="application/x-tex">|\partial\mat{E}/\partial\mat{W}|</annotation></semantics></math></p><div class="ws-grid" data-m="G"></div></div>
             <span class="ws-op" aria-hidden="true">=</span>
-            <div class="ws-mat"><p class="ws-h k-s">Score <span class="m">S</span></p><div class="ws-grid" data-m="S"></div></div>
+            <div class="ws-mat"><p class="ws-h k-s">Score <math class="m"><semantics><mi>𝐒</mi><annotation encoding="application/x-tex">\mat{S}</annotation></semantics></math></p><div class="ws-grid" data-m="S"></div></div>
           </div>
-          <p class="ws-read" aria-live="polite"><span class="m">W<sub>11</sub></span> = 1 is one of the smallest weights, but its gradient is the largest, so it scores highest. <span class="m">W<sub>22</sub></span> = 11, one of the two largest weights, scores 1.1. Point at a cell to read it.</p>
+          <p class="ws-read" aria-live="polite"><math class="m"><semantics><mrow><msub><mi>𝐖</mi><mn>11</mn></msub><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\mat{W}_{11} = 1</annotation></semantics></math> is one of the smallest weights, but its gradient is the largest, so it scores highest. <math class="m"><semantics><mrow><msub><mi>𝐖</mi><mn>22</mn></msub><mo>=</mo><mn>11</mn></mrow><annotation encoding="application/x-tex">\mat{W}_{22} = 11</annotation></semantics></math>, one of the two largest weights, scores 1.1. Point at a cell to read it.</p>
         </div>
         <figcaption class="fig-cap">The worked example of Figure 2b in the paper.</figcaption>
       </figure>
@@ -758,17 +762,17 @@ svg tspan.mut { fill: var(--muted); font-weight: 500; }
           <h3 class="story__title">Swap weights in pairs</h3>
         </div>
         <div class="band__b">
-          <p>Pruned weights are sorted by <span class="m">S</span> from high to low and kept weights from low to high, then paired in order. Each swap regrows one weight and prunes another, so the sparsity never changes. Only a fraction <span class="m">α</span> of the pairs with a positive gain is swapped:</p>
+          <p>Pruned weights are sorted by <math class="m"><semantics><mi>𝐒</mi><annotation encoding="application/x-tex">\mat{S}</annotation></semantics></math> from high to low and kept weights from low to high, then paired in order. Each swap regrows one weight and prunes another, so the sparsity never changes. Only a fraction <math class="m"><semantics><mi>α</mi><annotation encoding="application/x-tex">\alpha</annotation></semantics></math> of the pairs with a positive gain is swapped:</p>
           <div class="eq" role="group" aria-label="Number of swapped pairs">
-            <math display="block"><mrow><mi>N</mi><mo>=</mo><mi>α</mi><mo>·</mo><mrow><mo class="f">|</mo><mo class="f">{</mo><mi>i</mi><mo>:</mo><msubsup><mi class="c-s">S</mi><mi>i</mi><mtext>grow</mtext></msubsup><mo>−</mo><msubsup><mi class="c-s">S</mi><mi>i</mi><mtext>prune</mtext></msubsup><mo>&gt;</mo><mn>0</mn><mo class="f">}</mo><mo class="f">|</mo></mrow></mrow></math>
+            <math display="block"><semantics><mrow><mi>N</mi><mo>=</mo><mi>α</mi><mo>⋅</mo><mi>|</mi><mrow><mo fence="true" form="prefix" stretchy="false">{</mo><mi>i</mi><mo lspace="0.2222em" rspace="0.2222em">:</mo><msubsup><mi class="c-s">𝐒</mi><mi>i</mi><mtext>grow</mtext></msubsup><mo>−</mo><msubsup><mi class="c-s">𝐒</mi><mi>i</mi><mtext>prune</mtext></msubsup><mo>&gt;</mo><mn>0</mn><mo fence="true" form="postfix" stretchy="false">}</mo></mrow><mi>|</mi></mrow><annotation encoding="application/x-tex">N = \alpha \cdot |\{ i : \class{c-s}{\mat{S}}^{\text{grow}}_i - \class{c-s}{\mat{S}}^{\text{prune}}_i &gt; 0 \}|</annotation></semantics></math>
           </div>
-          <p class="note">Pairs are formed within a group: an output row, an input column, a matrix or the whole block. The best <span class="m">α</span> sits where the outlier pairs end, about 10% after Magnitude and 1% after Wanda on LLaMA-7B.</p>
+          <p class="note">Pairs are formed within a group: an output row, an input column, a matrix or the whole block. The best <math class="m"><semantics><mi>α</mi><annotation encoding="application/x-tex">\alpha</annotation></semantics></math> sits where the outlier pairs end, about 10% after Magnitude and 1% after Wanda on LLaMA-7B.</p>
         </div>
       </div>
       <figure class="band__fig sheet" id="ws-swap">
         <div class="panel">
           <div class="ws-swap">
-            <div class="ws-mat ws-mi"><p class="ws-h">Starting mask <span class="m">M<sub>i</sub></span></p><div class="ws-grid" data-m="M0"></div></div>
+            <div class="ws-mat ws-mi"><p class="ws-h">Starting mask <math class="m"><semantics><msub><mi>𝐌</mi><mi>𝐢</mi></msub><annotation encoding="application/x-tex">\mat{M}_{\mathbf{i}}</annotation></semantics></math></p><div class="ws-grid" data-m="M0"></div></div>
             <span class="ws-arrow" aria-hidden="true"></span>
             <div class="ws-q">
               <p class="ws-qh"><b>Grow</b> pruned weights, highest score first</p>
@@ -776,10 +780,10 @@ svg tspan.mut { fill: var(--muted); font-weight: 500; }
               <p class="ws-qh"><b>Prune</b> kept weights, lowest score first</p>
             </div>
             <span class="ws-arrow" aria-hidden="true"></span>
-            <div class="ws-mat ws-mr"><p class="ws-h">Rebuilt mask <span class="m">M<sub>r</sub></span></p><div class="ws-grid" data-m="M1"></div></div>
+            <div class="ws-mat ws-mr"><p class="ws-h">Rebuilt mask <math class="m"><semantics><msub><mi>𝐌</mi><mi>𝐫</mi></msub><annotation encoding="application/x-tex">\mat{M}_{\mathbf{r}}</annotation></semantics></math></p><div class="ws-grid" data-m="M1"></div></div>
           </div>
           <div class="ws-ctl">
-            <div class="ctl"><span class="ctl-label" id="ws-a-l">Swap ratio <span class="m">α</span></span>
+            <div class="ctl"><span class="ctl-label" id="ws-a-l">Swap ratio <math class="m"><semantics><mi>α</mi><annotation encoding="application/x-tex">\alpha</annotation></semantics></math></span>
               <div class="seg" role="group" aria-labelledby="ws-a-l" id="ws-alpha">
                 <button type="button" data-v="0" aria-pressed="false">0</button>
                 <button type="button" data-v="0.25" aria-pressed="false">25%</button>
@@ -790,7 +794,7 @@ svg tspan.mut { fill: var(--muted); font-weight: 500; }
             <p class="ws-read" aria-live="polite"></p>
           </div>
         </div>
-        <figcaption class="fig-cap">The same example. Each column is one pair: the weight to grow on top, the weight to prune below, the gain between them. At <span class="m">α</span> = 50% the two largest gains are swapped, as in the paper.</figcaption>
+        <figcaption class="fig-cap">The same example. Each column is one pair: the weight to grow on top, the weight to prune below, the gain between them. At <math class="m"><semantics><mrow><mi>α</mi><mo>=</mo><mn>50</mn><mi>%</mi></mrow><annotation encoding="application/x-tex">\alpha = 50\%</annotation></semantics></math> the two largest gains are swapped, as in the paper.</figcaption>
       </figure>
     </div>
   </div>
@@ -864,8 +868,8 @@ svg tspan.mut { fill: var(--muted); font-weight: 500; }
       <summary>More results</summary>
       <div class="more-body">
         <div class="res-block">
-          <h3 class="more-h">Choosing <span class="m">α</span> where the outliers end</h3>
-          <p class="more-p">Top: the gain of each candidate pair, largest first. Bottom: WikiText-2 perplexity of LLaMA-7B against <span class="m">α</span>, for four ways of grouping the pairs. The dashed line marks the best <span class="m">α</span>, which follows where the outlier pairs end: 10% after Magnitude, 1% after Wanda.</p>
+          <h3 class="more-h">Choosing <math class="m"><semantics><mi>𝜶</mi><annotation encoding="application/x-tex">\boldsymbol{\alpha}</annotation></semantics></math> where the outliers end</h3>
+          <p class="more-p">Top: the gain of each candidate pair, largest first. Bottom: WikiText-2 perplexity of LLaMA-7B against <math class="m"><semantics><mi>α</mi><annotation encoding="application/x-tex">\alpha</annotation></semantics></math>, for four ways of grouping the pairs. The dashed line marks the best <math class="m"><semantics><mi>α</mi><annotation encoding="application/x-tex">\alpha</annotation></semantics></math>, which follows where the outlier pairs end: 10% after Magnitude, 1% after Wanda.</p>
           <div class="fig-img"><img class="zoom" src="static/images/fig3.png" alt="Figure 3 of the paper: importance score of the mask rebuilding pairs and WikiText-2 perplexity against the mask rebuilding ratio for Magnitude, SparseGPT and Wanda starting masks on LLaMA-7B." loading="lazy" width="1800" height="696"></div>
         </div>
         <div class="res-block">
@@ -921,7 +925,7 @@ pip3 install -r requirements.txt</code></pre>
   --save_ppl out/ppl</code></pre>
       </div>
     </div>
-    <p class="note code-note"><code>--threshold</code> is the swap ratio <span class="m">α</span> (the paper's mask rebuilding ratio). Commands for every experiment are in <a href="https://github.com/YupengSu/LLM-Barber" target="_blank" rel="noopener"><code>script/</code></a>.</p>
+    <p class="note code-note"><code>--threshold</code> is the swap ratio <math class="m"><semantics><mi>α</mi><annotation encoding="application/x-tex">\alpha</annotation></semantics></math> (the paper's mask rebuilding ratio). Commands for every experiment are in <a href="https://github.com/YupengSu/LLM-Barber" target="_blank" rel="noopener"><code>script/</code></a>.</p>
   </div>
 </section>
 <section class="section" id="cite" aria-labelledby="cite-h">
@@ -1496,10 +1500,10 @@ const BlockView = (() => {
     ctx.fillStyle = U.rgbStr(U.mixArr(th['bg-soft'], th.accent, pv.fill));
     ctx.fill();
     ctx.lineWidth = 2; ctx.strokeStyle = U.rgbStr(pv.fill > 0 ? th.accent : th['line-strong']); ctx.stroke();
-    ctx.font = `italic 500 ${Math.round(p.r * 1.15)}px ${U.theme.math}`;
+    ctx.font = `400 ${Math.round(p.r * 1.3)}px ${U.theme.math}`;
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.fillStyle = U.rgbStr(pv.fill > 0.55 ? th['on-accent'] : pv.fill > 0 ? th.accent : th.muted);
-    ctx.fillText('E', p.x, p.y + 1);
+    ctx.fillText('\u{1D404}', p.x, p.y + 1); // 𝐄
     if (pv.text) {
       const small = clamp(Math.round(c * 1.1), 10, 12), big = clamp(Math.round(c * 1.3), 12, 14);
       ctx.textBaseline = 'alphabetic';
@@ -1530,13 +1534,13 @@ const BlockView = (() => {
 
   function label(ctx, cx, y, sub, dims, fs) {
     const th = U.theme.rgb;
-    const fW = `italic 500 ${fs + 2}px ${U.theme.math}`, fS = `600 ${fs - 2}px ${U.theme.font}`, fD = `500 ${fs - 1}px ${U.theme.font}`;
-    ctx.font = fW; const wW = ctx.measureText('W').width;
+    const fW = `400 ${fs + 4}px ${U.theme.math}`, fS = `600 ${fs - 2}px ${U.theme.font}`, fD = `500 ${fs - 1}px ${U.theme.font}`;
+    ctx.font = fW; const wW = ctx.measureText('\u{1D416}').width; // 𝐖
     ctx.font = fS; const wS = ctx.measureText(sub).width;
     ctx.font = fD; const wD = ctx.measureText(dims).width;
     let x = cx - (wW + 1 + wS + 6 + wD) / 2;
     ctx.fillStyle = U.rgbStr(th.ink);
-    ctx.font = fW; ctx.fillText('W', x, y); x += wW + 1;
+    ctx.font = fW; ctx.fillText('\u{1D416}', x, y); x += wW + 1;
     ctx.font = fS; ctx.fillText(sub, x, y + 3); x += wS + 6;
     ctx.fillStyle = U.rgbStr(th.muted); ctx.font = fD; ctx.fillText(dims, x, y);
   }
@@ -1620,8 +1624,8 @@ const Demo = (() => {
     function stepText(i) {
       const sp = Math.round(st.sparsity * 100);
       if (i === 0) return `Start from any one-shot mask. Here ${NAMES[st.init]} pruning removes ${sp}% of the weights.`;
-      if (i === 1) return 'Measure one error <span class="m">E</span> at the block output and backpropagate it once. Every weight gets the score <span class="m"><span class="u">|</span>W<span class="u">| · |</span>∂E/∂W<span class="u">|</span></span>.';
-      if (i === 2) return `Swap the highest-scoring pruned weights for the lowest-scoring kept ones, one for one: ${D.swaps} pairs at <span class="m">α</span> = ${Math.round(st.alpha * 100)}%.`;
+      if (i === 1) return 'Measure one error <math class="m"><mi>𝐄</mi></math> at the block output and backpropagate it once. Every weight gets the score <math class="m"><mrow><mi>|</mi><mi>𝐖</mi><mi>|</mi><mo>⋅</mo><mi>|</mi><mi>∂</mi><mi>𝐄</mi><mi>/</mi><mi>∂</mi><mi>𝐖</mi><mi>|</mi></mrow></math>.';
+      if (i === 2) return `Swap the highest-scoring pruned weights for the lowest-scoring kept ones, one for one: ${D.swaps} pairs at <math class="m"><mrow><mi>α</mi><mo>=</mo><mn>${Math.round(st.alpha * 100)}</mn><mi>%</mi></mrow></math>.`;
       const ch = D.e0 > 0 ? Math.round((1 - D.e1 / D.e0) * 100) : 0;
       return `Same ${sp}% sparsity, same weight values. The block error drops from ${pct(D.e0)} to ${pct(D.e1)}${ch > 0 ? ` (${ch}% lower)` : ''}.`;
     }
@@ -1959,7 +1963,7 @@ const BlockFig = (() => {
         const cells = [];
         for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) cells.push(svg('rect', { x: pad + c * (cell + cg), y: pad + r * (cell + cg), width: cell, height: cell, rx: 2 }, g));
         const lab = svg('text', { x: TILE / 2, y: TILE + 18, 'text-anchor': 'middle', 'font-size': 16, style: 'fill:var(--ink)' }, g);
-        const w = svg('tspan', { class: 't-math' }, lab); w.textContent = 'W';
+        const w = svg('tspan', { class: 't-math' }, lab); w.textContent = '\u{1D416}'; // 𝐖, bold as in the paper
         const s = svg('tspan', { class: 't-ui', dy: 4, 'font-size': 11, 'font-weight': 650 }, lab); s.textContent = SUB[id];
         // local probe (layer mode)
         const lp = svg('g', { style: 'opacity:0' }, gNodes);
@@ -1972,7 +1976,7 @@ const BlockFig = (() => {
         const w = orient === 'wide' ? lay.opW[id] : lay.opW[id];
         svg('rect', { x: x - w / 2, y: y - OPH / 2, width: w, height: OPH, rx: 21, style: 'fill:var(--bg-card);stroke:var(--muted);stroke-width:1.5' }, gNodes);
         const tx = svg('text', { x, y: y + 5, 'text-anchor': 'middle', 'font-size': 15, class: id === 'act' ? 't-math' : 't-ui', 'font-weight': id === 'act' ? 400 : 600, style: 'fill:var(--ink)' }, gNodes);
-        tx.textContent = id === 'attn' ? 'Attention' : 'SiLU(g) ⊙ u';
+        tx.textContent = id === 'attn' ? 'Attention' : 'SiLU(\u{1D420}) ⊙ \u{1D42E}'; // SiLU(𝐠) ⊙ 𝐮
       }
       st.probes = {};
       for (const id of ['Eatt', 'Emlp']) {
@@ -1981,13 +1985,13 @@ const BlockFig = (() => {
         const dot = svg('circle', { cx: x, cy: y, r: 4, style: 'fill:var(--muted)' }, g);
         const c = svg('circle', { cx: x, cy: y, r: PR, style: 'fill:var(--bg-card);stroke:var(--lb-frame);stroke-width:2' }, g);
         const tx = svg('text', { x, y: y + 6, 'text-anchor': 'middle', class: 't-math', 'font-size': 18, style: 'fill:var(--lb-frame-ink)' }, g);
-        tx.textContent = 'E';
+        tx.textContent = '\u{1D404}'; // 𝐄
         st.probes[id] = { dot, c, tx };
       }
       for (const id of ['X', 'Y']) {
         const [x, y] = N[id];
         const tx = svg('text', { x, y: y + 6, 'text-anchor': 'middle', class: 't-math', 'font-size': 20, style: 'fill:var(--ink)' }, gNodes);
-        tx.textContent = id === 'X' ? 'X' : 'Y';
+        tx.textContent = id === 'X' ? '\u{1D417}' : '\u{1D418}'; // 𝐗, 𝐘
       }
       // pulses
       const gP = svg('g', null, root);
@@ -2143,6 +2147,7 @@ const Sheet = (() => {
   const num = (v) => (Number.isInteger(v) ? String(v) : String(v));
   const sgn = (v) => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v);
   const sub = (i, j) => `${i + 1}${j + 1}`;
+  const bd = (x) => String(x).replace(/\d/g, (d) => String.fromCodePoint(0x1D7CE + +d)); // bold digits, as \mathbf in the math
   const el = (tag, cls, parent, text) => U.el(tag, cls, parent, text);
 
   // one 4 × 4 grid of tiles; shade is the value relative to the largest in the matrix
@@ -2179,7 +2184,7 @@ const Sheet = (() => {
       cur = i == null ? null : [i, j];
       if (!cur) { read.innerHTML = def; return; }
       Object.values(T).forEach((ts) => at(ts, i, j).classList.add('on'));
-      read.innerHTML = `<span class="m">W<sub>${sub(i, j)}</sub></span> = ${W[i][j]}, <span class="m"><span class="u">|</span>∂E/∂W<sub>${sub(i, j)}</sub><span class="u">|</span></span> = ${G[i][j]}, so <span class="m">S<sub>${sub(i, j)}</sub></span> = <b>${S[i][j]}</b>.`;
+      read.innerHTML = `<math class="m"><mrow><msub><mi>𝐖</mi><mn>${sub(i, j)}</mn></msub><mo>=</mo><mn>${W[i][j]}</mn></mrow></math>, <math class="m"><mrow><mi>|</mi><mi>∂</mi><mi>𝐄</mi><mi>/</mi><mi>∂</mi><msub><mi>𝐖</mi><mn>${sub(i, j)}</mn></msub><mi>|</mi><mo>=</mo><mn>${G[i][j]}</mn></mrow></math>, so <math class="m"><mrow><msub><mi>𝐒</mi><mn>${sub(i, j)}</mn></msub><mo>=</mo><mn>${bd(S[i][j])}</mn></mrow></math>.`;
     };
     Object.values(T).forEach((ts) => ts.forEach((t) => {
       t.tabIndex = -1;
@@ -2223,8 +2228,8 @@ const Sheet = (() => {
       host1.setAttribute('role', 'img');
       host1.setAttribute('aria-label', 'Rebuilt mask: ' + M1.map((r) => r.join(' ')).join('; '));
       const gained = r2(pairs.slice(0, n).reduce((a, x) => a + x.gain, 0));
-      read.innerHTML = n === 0 ? `${npos} of the ${pairs.length} pairs have a positive gain; at <span class="m">α</span> = 0 the mask stays as it is.`
-        : `<span class="m">N</span> = ${Math.round(alpha * 100)}% × ${npos} = <b>${n}</b> pair${n > 1 ? 's' : ''} swapped, gain ${pairs.slice(0, n).map((x) => sgn(x.gain)).join(', ')}. Still 8 of 16 weights kept.`;
+      read.innerHTML = n === 0 ? `${npos} of the ${pairs.length} pairs have a positive gain; at <math class="m"><mrow><mi>α</mi><mo>=</mo><mn>0</mn></mrow></math> the mask stays as it is.`
+        : `<math class="m"><mrow><mi>N</mi><mo>=</mo><mn>${Math.round(alpha * 100)}</mn><mi>%</mi><mo>×</mo><mn>${npos}</mn><mo>=</mo><mn>${bd(n)}</mn></mrow></math> pair${n > 1 ? 's' : ''} swapped, gain ${pairs.slice(0, n).map((x) => sgn(x.gain)).join(', ')}. Still 8 of 16 weights kept.`;
       read.dataset.gain = gained;
       lightPair(hot);
     }
